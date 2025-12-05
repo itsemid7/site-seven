@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Config</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <pre id="output">Loading...</pre>
+    <script>
+        const SUPABASE_URL = 'https://bwpskigahszxkgzxtewf.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cHNraWdhaHN6eGtnenh0ZXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3MDQzMDgsImV4cCI6MjA4MDI4MDMwOH0.D99euPduBI0kJuE0u3Yw4fJCsvT5LSyO4VTbtbY3TD0';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function fetchConfig() {
+            const { data, error } = await supabase.from('store_settings').select('*');
+            if (error) {
+                document.getElementById('output').textContent = 'Error: ' + JSON.stringify(error, null, 2);
+            } else {
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            }
+        }
+        fetchConfig();
+    </script>
+</body>
+
+</html>

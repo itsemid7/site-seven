@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otimizar Imagens | Admin SEVEN</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .optimization-log {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 15px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-red);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <main class="main-content" style="margin: 0 auto; max-width: 800px; padding: 40px;">
+            <h2 class="text-display">Otimizar Imagens dos Produtos</h2>
+            <p>Esta ferramenta irá percorrer todos os produtos, redimensionar as imagens para no máximo 800x800px e
+                comprimi-las para reduzir o tamanho do banco de dados e acelerar o site.</p>
+
+            <div class="alert"
+                style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> Este processo pode demorar vários
+                minutos. Não feche a página.
+            </div>
+
+            <button id="start-btn" class="btn-primary" onclick="startOptimization()">
+                <i class="fas fa-magic"></i> Iniciar Otimização
+            </button>
+            <a href="products.html" class="btn-primary"
+                style="background: #ccc; color: #333; text-decoration: none; margin-left: 10px;">Voltar</a>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p id="progress-text" style="text-align: center; margin-top: 5px;">0%</p>
+
+            <div class="optimization-log" id="log">
+                Aguardando início...
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-init.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script>
+        const logEl = document.getElementById('log');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const startBtn = document.getElementById('start-btn');
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function compressImage(base64, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = base64;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    // If already small, don't resize but re-compress
+                    if (width <= maxWidth && height <= maxWidth) {
+                        // Check if it's already efficient? Hard to know size from Image object.
+                        // We just redraw to canvas to compress.
+                    } else {
+                        if (width > height) {
+                            height = Math.round((height *= maxWidth / width));
+                            width = maxWidth;
+                        } else {
+                            width = Math.round((width *= maxHeight / height));
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = () => {
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otimizar Imagens | Admin SEVEN</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .optimization-log {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 15px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-red);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <main class="main-content" style="margin: 0 auto; max-width: 800px; padding: 40px;">
+            <h2 class="text-display">Otimizar Imagens dos Produtos</h2>
+            <p>Esta ferramenta irá percorrer todos os produtos, redimensionar as imagens para no máximo 800x800px e
+                comprimi-las para reduzir o tamanho do banco de dados e acelerar o site.</p>
+
+            <div class="alert"
+                style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> Este processo pode demorar vários
+                minutos. Não feche a página.
+            </div>
+
+            <button id="start-btn" class="btn-primary" onclick="startOptimization()">
+                <i class="fas fa-magic"></i> Iniciar Otimização
+            </button>
+            <a href="products.html" class="btn-primary"
+                style="background: #ccc; color: #333; text-decoration: none; margin-left: 10px;">Voltar</a>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p id="progress-text" style="text-align: center; margin-top: 5px;">0%</p>
+
+            <div class="optimization-log" id="log">
+                Aguardando início...
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-init.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script>
+        const logEl = document.getElementById('log');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const startBtn = document.getElementById('start-btn');
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function compressImage(base64, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = base64;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    // If already small, don't resize but re-compress
+                    if (width <= maxWidth && height <= maxWidth) {
+                        // Check if it's already efficient? Hard to know size from Image object.
+                        // We just redraw to canvas to compress.
+                    } else {
+                        if (width > height) {
+                            height = Math.round((height *= maxWidth / width));
+                            width = maxWidth;
+                        } else {
+                            width = Math.round((width *= maxWidth / height)); // Corrected to use maxWidth for height calculation
+                            height = maxWidth;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = () => {
+                    log('Erro ao carregar imagem para compressão. Mantendo original.');
+                    resolve(base64);
+                };
+            });
+        }
+
+        async function startOptimization() {
+            startBtn.disabled = true;
+            log('Iniciando busca de produtos...');
+
+            try {
+                // Fetch all products
+                const { data: products, error } = await db.client.from('products').select('*');
+
+                if (error) throw error;
+
+                log(`${products.length} produtos encontrados.`);
+
+                let processed = 0;
+                const total = products.length;
+                const BATCH_SIZE = 5; // Process 5 products concurrently
+
+                for (let i = 0; i < total; i += BATCH_SIZE) {
+                    const batch = products.slice(i, i + BATCH_SIZE);
+                    
+                    await Promise.all(batch.map(async (product) => {
+                        try {
+                            let changed = false;
+                            let newImages = [];
+
+                            if (product.images && product.images.length > 0) {
+                                for (let j = 0; j < product.images.length; j++) {
+                                    const original = product.images[j];
+                                    if (original && original.startsWith('data:image')) {
+                                        // Calculate approximate size
+                                        const sizeInBytes = 4 * Math.ceil((original.length / 3)) * 0.5624896334383812;
+                                        const sizeInKB = sizeInBytes / 1024;
+
+                                        if (sizeInKB > 200) { // Only compress if > 200KB
+                                            // log(`  [${product.name}] Img ${j + 1}: ${Math.round(sizeInKB)}KB -> Comprimindo...`);
+                                            const compressed = await compressImage(original);
+                                            newImages.push(compressed);
+                                            changed = true;
+                                        } else {
+                                            newImages.push(original);
+                                        }
+                                    } else {
+                                        newImages.push(original);
+                                    }
+                                }
+                            }
+
+                            if (changed) {
+                                const { error: updateError } = await db.client
+                                    .from('products')
+                                    .update({ images: newImages })
+                                    .eq('id', product.id);
+
+                                if (updateError) {
+                                    log(`ERRO ao salvar ${product.name}: ${updateError.message}`);
+                                } else {
+                                    log(`[OK] ${product.name} otimizado.`);
+                                }
+                            } else {
+                                // log(`[SKIP] ${product.name} já otimizado.`);
+                            }
+                        } catch (pErr) {
+                            log(`ERRO em ${product.name}: ${pErr.message}`);
+                        } finally {
+                            processed++;
+                            const pct = Math.round((processed / total) * 100);
+                            progressFill.style.width = `${pct}%`;
+                            progressText.textContent = `${pct}% (${processed}/${total})`;
+                        }
+                    }));
+                }
+
+                log('Otimização concluída!');
+                alert('Otimização concluída com sucesso!');
+
+            } catch (err) {
+                console.error(err);
+                log(`ERRO FATAL: ${err.message}`);
+            } finally {
+                startBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

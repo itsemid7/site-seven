@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banners | Admin SEVEN</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="overlay" id="mobile-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3 style="margin: 0;">SEVEN<span style="color: var(--color-red);">.</span></h3>
+                <p style="font-size: 0.8rem; color: #666;">Painel Administrativo</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Pedidos</a></li>
+                <li><a href="products.html"><i class="fas fa-box"></i> Produtos</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> Categorias</a></li>
+                <li><a href="users.html"><i class="fas fa-users"></i> Usuários</a></li>
+                <li><a href="freight.html"><i class="fas fa-truck"></i> Frete</a></li>
+                <li><a href="banners.html" class="active"><i class="fas fa-images"></i> Banners</a></li>
+                <li><a href="../index.html" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Loja</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" onclick="db.logout(); window.location.href='../login.html'"
+                    style="color: #ccc; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2 class="text-display">Gerenciar Banners</h2>
+                <button class="btn-primary" onclick="openBannerModal()">
+                    <i class="fas fa-plus"></i> Novo Banner
+                </button>
+            </div>
+
+            <div id="banners-container" class="banner-list">
+                <!-- Banners will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Banner Modal -->
+    <div id="banner-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">Adicionar Banner</h3>
+            <form id="banner-form">
+                <div class="form-group">
+                    <label class="form-label">Tipo de Banner</label>
+                    <select id="banner-type" class="form-control">
+                        <option value="hero">Hero Slider (Topo - Principal)</option>
+                        <option value="promo">Promo Grid (Abaixo do Marquee)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipo de Imagem</label>
+                    <div style="display: flex; gap: 20px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="upload-type" value="file" checked onchange="toggleUploadType()">
+                            Upload de Arquivo
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="upload-type" value="url" onchange="toggleUploadType()"> Link da
+                            Imagem
+                        </label>
+                    </div>
+                </div>
+
+                <!-- File Inputs -->
+                <div id="file-inputs">
+                    <div class="form-group">
+                        <label class="form-label">Imagem (Desktop)</label>
+                        <input type="file" id="banner-image" class="form-control" accept="image/*">
+                        <input type="hidden" id="banner-image-base64">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Imagem (Mobile - Opcional)</label>
+                        <input type="file" id="banner-image-mobile" class="form-control" accept="image/*">
+                        <input type="hidden" id="banner-image-mobile-base64">
+                    </div>
+                </div>
+
+                <!-- URL Inputs -->
+                <div id="url-inputs" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">URL da Imagem (Desktop)</label>
+                        <input type="url" id="banner-url" class="form-control"
+                            placeholder="https://exemplo.com/imagem.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">URL da Imagem (Mobile - Opcional)</label>
+                        <input type="url" id="banner-url-mobile" class="form-control"
+                            placeholder="https://exemplo.com/imagem-mobile.jpg">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Link de Destino</label>
+                    <input type="text" id="banner-link" class="form-control" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Texto Alt (Acessibilidade)</label>
+                    <input type="text" id="banner-alt" class="form-control" placeholder="Descrição do banner">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-danger" onclick="closeBannerModal()"
+                        style="background: #ccc; color: #333;">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-init.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Mobile Toggle Logic
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Modal Logic
+        const modal = document.getElementById('banner-modal');
+        const form = document.getElementById('banner-form');
+
+        function openBannerModal() {
+            form.reset();
+            document.getElementById('banner-image-base64').value = '';
+            document.getElementById('banner-image-mobile-base64').value = '';
+            toggleUploadType(); // Reset view
+            modal.style.display = 'flex';
+        }
+
+        function closeBannerModal() {
+            modal.style.display = 'none';
+        }
+
+        function toggleUploadType() {
+            const type = document.querySelector('input[name="upload-type"]:checked').value;
+            const fileInputs = document.getElementById('file-inputs');
+            const urlInputs = document.getElementById('url-inputs');
+
+            if (type === 'file') {
+                fileInputs.style.display = 'block';
+                urlInputs.style.display = 'none';
+                document.getElementById('banner-image').required = true;
+                document.getElementById('banner-url').required = false;
+            } else {
+                fileInputs.style.display = 'none';
+                urlInputs.style.display = 'block';
+                document.getElementById('banner-image').required = false;
+                document.getElementById('banner-url').required = true;
+            }
+        }
+
+        // Image Processing
+        document.getElementById('banner-image').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('banner-image-base64').value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('banner-image-mobile').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('banner-image-mobile-base64').value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Load Banners
+        async function loadBanners() {
+            const container = document.getElementById('banners-container');
+            container.innerHTML = '<p style="text-align:center;">Carregando...</p>';
+
+            try {
+                let banners = await db.getBanners();
+
+                // Auto-seed if empty (First run)
+                if (banners.length === 0) {
+                    console.log('Seeding default banners...');
+                    const defaultBanners = [
+                        {
+                            image: 'https://images.unsplash.com/photo-1523398002811-999ca8dec234?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+                            alt: 'NOVA COLEÇÃO 2025',
+                            link: 'category.html?category=novidades',
+                            type: 'hero'
+                        },
+                        {
+                            image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+                            alt: 'OFERTAS ESPECIAIS',
+                            link: 'category.html?category=ofertas',
+                            type: 'hero'
+                        }
+                    ];
+
+                    for (const b of defaultBanners) {
+                        await db.addBanner(b);
+                    }
+                    // Fetch again
+                    banners = await db.getBanners();
+                }
+
+                container.innerHTML = '';
+
+                if (banners.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;">Nenhum banner cadastrado.</p>';
+                    return;
+                }
+
+                banners.forEach((banner) => {
+                    const div = document.createElement('div');
+                    div.className = 'banner-item';
+                    div.innerHTML = `
+                        <img src="${banner.image}" alt="${banner.alt}" style="max-height: 100px; object-fit: cover;">
+                        <div class="banner-info">
+                            <p><strong>Tipo:</strong> ${banner.type === 'hero' ? 'Hero Slider' : 'Promo Grid'}</p>
+                            <p><strong>Link:</strong> ${banner.link || '#'}</p>
+                            <p><strong>Alt:</strong> ${banner.alt}</p>
+                            <div class="banner-actions">
+                                <button class="btn-danger" onclick="deleteBanner('${banner.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar banners:', error);
+                container.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar banners.</p>';
+            }
+        }
+
+        // Save Banner
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.querySelector('input[name="upload-type"]:checked').value;
+            let image, imageMobile;
+
+            if (type === 'file') {
+                image = document.getElementById('banner-image-base64').value;
+                imageMobile = document.getElementById('banner-image-mobile-base64').value;
+            } else {
+                image = document.getElementById('banner-url').value;
+                imageMobile = document.getElementById('banner-url-mobile').value;
+            }
+
+            if (!image) {
+                alert('Por favor, selecione uma imagem ou insira uma URL.');
+                return;
+            }
+
+            const newBanner = {
+                image: image,
+                image_mobile: imageMobile,
+                link: document.getElementById('banner-link').value,
+                alt: document.getElementById('banner-alt').value,
+                type: document.getElementById('banner-type').value
+            };
+
+            try {
+                await db.addBanner(newBanner);
+                closeBannerModal();
+                await loadBanners();
+                alert('Banner adicionado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao salvar banner:', error);
+                alert('Erro ao salvar banner. Verifique o console.');
+            }
+        });
+
+        // Delete Banner
+        window.deleteBanner = async function (id) {
+            if (confirm('Tem certeza que deseja remover este banner?')) {
+                try {
+                    await db.deleteBanner(id);
+                    await loadBanners();
+                } catch (error) {
+                    console.error('Erro ao deletar:', error);
+                    alert('Erro ao remover banner.');
+                }
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadBanners);
+    </script>
+</body>
+
+</html>

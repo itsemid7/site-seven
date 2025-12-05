@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SEVEN OUTLET PREMIUM</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 40px;
+            background: var(--color-gray-100);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--color-text-light);
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: var(--color-black);
+            border-bottom: 2px solid var(--color-black);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--color-black);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.3s;
+        }
+
+        .auth-btn:hover {
+            background: var(--color-red);
+        }
+
+        .error-msg {
+            color: var(--color-red);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 4px;
+        }
+
+        .success-msg {
+            color: #2e7d32;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 4px;
+        }
+
+        .forgot-pass {
+            display: block;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 10px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .forgot-pass:hover {
+            text-decoration: underline;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header sticky">
+        <div class="container header-inner">
+            <div class="logo">
+                <a href="index.html" class="text-display">SEVEN<span style="color: var(--color-red);">.</span></a>
+            </div>
+
+            <nav class="nav-desktop">
+                <ul>
+                    <!-- Injected by nav.js -->
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a href="index.html" style="color: #666; font-size: 0.9rem;">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-overlay"></div>
+    <nav class="mobile-nav">
+        <ul>
+            <!-- Injected by nav.js -->
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchTab('login', event)">ENTRAR</div>
+                <div class="auth-tab" onclick="switchTab('register', event)">CRIAR CONTA</div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="error-msg" id="login-error"></div>
+                <div class="form-group">
+                    <label>E-mail ou Telefone</label>
+                    <input type="text" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="auth-btn">Entrar</button>
+                <a class="forgot-pass" onclick="openRecoveryModal()">Esqueci minha senha</a>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" style="display: none;">
+                <div class="error-msg" id="register-error"></div>
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="reg-name" required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone (WhatsApp)</label>
+                    <input type="tel" id="reg-phone" placeholder="(11) 99999-9999" required oninput="maskPhone(event)">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="reg-pass" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Senha</label>
+                    <input type="password" id="reg-pass-confirm" required>
+                </div>
+                <button type="submit" class="auth-btn">Criar Conta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Recovery Modal -->
+    <div id="recovery-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRecoveryModal()">&times;</span>
+            <h3 style="margin-bottom: 20px;">Recuperar Senha</h3>
+            <p style="margin-bottom: 20px; color: #666; font-size: 0.9rem;">
+                Digite seu e-mail ou telefone para redefinir sua senha.
+            </p>
+            <form id="recovery-form">
+                <div class="success-msg" id="recovery-success"></div>
+                <div class="error-msg" id="recovery-error"></div>
+                <div class="form-group">
+                    <label>E-mail ou Telefone</label>
+                    <input type="text" id="recovery-input" required>
+                </div>
+                <button type="submit" class="auth-btn">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-init.js"></script>
+    <script src="assets/js/db.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/nav.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        // Tab Switching
+        function switchTab(tab, event) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'login') {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('register-form').style.display = 'none';
+            } else {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            }
+        }
+
+        // Phone Mask
+        function maskPhone(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+            } else if (value.length > 5) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            }
+            e.target.value = value;
+        }
+
+        // Login Logic
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+
+            const result = await authService.login(email, pass);
+
+            if (result.user) {
+                // Check role to redirect admins
+                try {
+                    const { data: profile } = await db.client
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', result.user.id)
+                        .single();
+
+                    if (profile && (profile.role === 'admin' || profile.role === 'staff')) {
+                        window.location.href = 'admin/users.html';
+                    } else {
+                        window.location.href = 'checkout.html';
+                    }
+                } catch (err) {
+                    console.error('Error checking role:', err);
+                    window.location.href = 'checkout.html';
+                }
+            } else {
+                const err = document.getElementById('login-error');
+                err.textContent = result.error || 'Erro ao fazer login';
+                err.style.display = 'block';
+            }
+        });
+
+        // Register Logic
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('reg-pass').value;
+            const confirm = document.getElementById('reg-pass-confirm').value;
+            const err = document.getElementById('register-error');
+
+            if (pass !== confirm) {
+                err.textContent = 'As senhas não coincidem!';
+                err.style.display = 'block';
+                return;
+            }
+
+            if (pass.length < 6) {
+                err.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                err.style.display = 'block';
+                return;
+            }
+
+            const data = {
+                name: document.getElementById('reg-name').value,
+                email: document.getElementById('reg-email').value,
+                phone: document.getElementById('reg-phone').value,
+                password: pass
+            };
+
+            const result = await authService.register(data);
+
+            if (result.user) {
+                window.location.href = 'checkout.html';
+            } else {
+                err.textContent = result.error || 'Erro ao criar conta: ' + JSON.stringify(result);
+                err.style.display = 'block';
+            }
+        });
+
+        // Recovery Logic
+        const modal = document.getElementById('recovery-modal');
+
+        function openRecoveryModal() {
+            modal.style.display = 'flex';
+        }
+
+        function closeRecoveryModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) closeRecoveryModal();
+        }
+
+        document.getElementById('recovery-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('recovery-input').value;
+            const result = await authService.recoverPassword(input);
+
+            const successMsg = document.getElementById('recovery-success');
+            const errorMsg = document.getElementById('recovery-error');
+
+            if (result.success) {
+                errorMsg.style.display = 'none';
+                successMsg.textContent = 'Email de recuperação enviado!';
+                successMsg.style.display = 'block';
+
+                // Redirect to WhatsApp after 1.5 seconds
+                setTimeout(() => {
+                    const message = encodeURIComponent("Olá, esqueci minha senha consegue me ajudar?");
+                    // Using a placeholder number. In a real app, this should be the store's support number.
+                    window.location.href = `https://wa.me/5511996224378?text=${message}`;
+                }, 1500);
+            } else {
+                successMsg.style.display = 'none';
+                errorMsg.textContent = result.error || 'Erro ao recuperar senha';
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

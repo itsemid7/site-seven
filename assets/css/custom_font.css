@@ -1,0 +1,6 @@
+/* Apply new font to category titles */
+.category-content h3 {
+    font-family: var(--font-fun) !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}

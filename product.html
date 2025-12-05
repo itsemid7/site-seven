@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produto | SEVEN OUTLET PREMIUM</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Oswald:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .product-container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            padding-top: 40px;
+            padding-bottom: 60px;
+        }
+
+        .product-gallery {
+            display: flex;
+            gap: 20px;
+        }
+
+        .gallery-thumbs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 80px;
+        }
+
+        .gallery-thumb {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 1px solid transparent;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+
+        .gallery-thumb.active,
+        .gallery-thumb:hover {
+            border-color: var(--color-black);
+            opacity: 1;
+        }
+
+        .main-image-container {
+            flex: 1;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 600px;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .main-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-details {
+            padding: 20px;
+        }
+
+        .product-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .current-price {
+            font-weight: 700;
+        }
+
+        .pix-discount {
+            background: #e6f9e6;
+            color: #28a745;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .selector-group {
+            margin-bottom: 25px;
+        }
+
+        .selector-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .size-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .size-option {
+            min-width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            padding: 0 10px;
+        }
+
+        .size-option:hover {
+            border-color: #999;
+        }
+
+        .size-option.active {
+            background: var(--color-black);
+            color: white;
+            border-color: var(--color-black);
+        }
+
+        .color-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-option {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .color-option.active::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 1px solid var(--color-black);
+            border-radius: 50%;
+        }
+
+        .btn-add-cart {
+            width: 100%;
+            padding: 18px;
+            background: var(--color-black);
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .btn-add-cart:hover {
+            background: #333;
+        }
+
+        .product-description {
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+
+        .product-description h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .product-description p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Size Guide Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .size-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .size-table th,
+        .size-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .size-table th {
+            background: #f9f9f9;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .product-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .product-gallery {
+                flex-direction: column-reverse;
+            }
+
+            .gallery-thumbs {
+                flex-direction: row;
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .main-image-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Promo Bar -->
+    <div class="promo-bar text-center">
+        <p>ENTREGA EXPRESS POR MOTOBOY EM ATÉ 4 HORAS EM SP | ENTREGA EM TODO O BRASIL</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header sticky">
+        <div class="container header-inner">
+            <div class="logo">
+                <a href="index.html" class="text-display">SEVEN<span style="color: var(--color-red);">.</span></a>
+            </div>
+
+            <nav class="nav-desktop">
+                <ul>
+                    <!-- Injected by nav.js -->
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a href="#" class="search-trigger"><i class="fas fa-search"></i></a>
+                <a href="account.html" class="account-link"><i class="far fa-user"></i></a>
+                <a href="checkout.html" class="cart-trigger">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count">0</span>
+                </a>
+                <button class="mobile-menu-trigger"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-overlay"></div>
+    <nav class="mobile-nav">
+        <ul>
+            <!-- Injected by nav.js -->
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container product-container" id="product-content">
+        <!-- Injected by JS -->
+        <div style="grid-column: 1 / -1; text-align: center; padding: 100px;">
+            <p>Carregando produto...</p>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <section class="section">
+        <div class="container">
+            <h2 class="text-display text-center" style="margin-bottom: 40px;">Você Também Pode Gostar</h2>
+            <div class="products-grid" id="related-products">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h3 class="text-display">Seven.</h3>
+                <p>COMPRA 100% SEGURA<br> Receba em Casa</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/sevenoutletpremium/" target="_blank"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/5511996224378" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Ajuda</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Página de FAQ em construção'); return false;">FAQ</a></li>
+                    <li><a href="#" onclick="alert('Página de Entregas em construção'); return false;">Entregas</a></li>
+                    <li><a href="#" onclick="alert('Página de Trocas em construção'); return false;">Trocas e
+                            Devoluções</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Institucional</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Página Sobre Nós em construção'); return false;">Sobre Nós</a></li>
+                    <li><a href="#" onclick="alert('Página de Privacidade em construção'); return false;">Política de
+                            Privacidade</a></li>
+                </ul>
+            </div>
+            <div class="footer-col newsletter">
+                <h4>Newsletter</h4>
+                <p>Receba ofertas exclusivas.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Obrigado por se inscrever!');">
+                    <input type="email" placeholder="Seu e-mail">
+                    <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2025 Seven Outlet Premium. Todos os direitos reservados.</p>
+            <div class="payment-icons">
+                <i class="fas fa-qrcode"></i> <!-- Pix -->
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay">
+        <div class="search-container">
+            <button class="close-search"><i class="fas fa-times"></i></button>
+            <input type="text" class="search-input" placeholder="O que você procura?">
+        </div>
+    </div>
+
+    <!-- Size Guide Modal -->
+    <div id="size-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('size-modal').style.display='none'"
+                style="position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer;">&times;</span>
+            <h3 style="margin-bottom: 20px;">Guia de Medidas</h3>
+            <div id="size-table-container"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-init.js"></script>
+    <script src="assets/js/db.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/nav.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const slug = urlParams.get('slug');
+                const id = urlParams.get('id');
+
+                let product = null;
+
+                // Fetch product async
+                if (id) {
+                    product = await db.getProduct(id);
+                } else if (slug) {
+                    product = await db.getProduct(slug);
+                }
+
+                if (!product) {
+                    document.getElementById('product-content').innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 100px;">
+                            <h2>Produto não encontrado</h2>
+                            <p>O produto que você procura não está disponível.</p>
+                            <a href="index.html" class="btn-primary" style="display: inline-block; margin-top: 20px;">Voltar para a Loja</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Store globally
+                window.currentProduct = product;
+
+                // Render Product
+                renderProductDetails(product);
+
+                // Render Reviews (Mock data for now)
+                const reviews = await db.getReviews(product.id);
+                renderReviews(reviews);
+
+                // Render Related
+                await renderRelatedProducts(product);
+
+            } catch (error) {
+                console.error('Erro ao carregar produto:', error);
+                document.getElementById('product-content').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 100px;">
+                        <h2>Ops! Algo deu errado.</h2>
+                        <p>Não foi possível carregar o produto. Tente novamente.</p>
+                    </div>
+                `;
+            }
+        });
+
+        function renderReviews(reviews) {
+            const container = document.getElementById('product-reviews-container');
+            if (!container) return;
+
+            container.innerHTML = `
+                <h3 style="font-size: 1.2rem; margin-bottom: 20px;">Avaliações de Clientes</h3>
+                <div class="reviews-grid" style="display: grid; gap: 20px;">
+                    ${reviews.map(review => `
+                    <div class="review-card" style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                        <div class="review-header" style="display: flex; gap: 15px; margin-bottom: 10px;">
+                            <div class="review-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; color: #888; font-size: 1.2rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="review-name" style="font-weight: 600;">${review.user}</div>
+                                <div class="review-stars" style="color: #ffc107; font-size: 0.9rem;">
+                                    ${Array(5).fill(0).map((_, i) =>
+                `<i class="fas fa-star ${i < review.rating ? '' : 'empty'}" style="${i >= review.rating ? 'color: #ddd;' : ''}"></i>`
+            ).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="review-text" style="color: #555; font-size: 0.95rem; margin-bottom: 10px;">"${review.comment}"</p>
+                        <div class="review-date" style="font-size: 0.8rem; color: #999;">${review.date}</div>
+                    </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderProductDetails(product) {
+            const container = document.getElementById('product-content');
+
+            // Normalize Media
+            let media = product.images ? product.images.map(url => ({ type: 'image', url })) : [];
+            if (media.length === 0 && product.image) {
+                media = [{ type: 'image', url: product.image }];
+            }
+            if (media.length === 0) {
+                media = [{ type: 'image', url: 'https://via.placeholder.com/600' }];
+            }
+
+            // Store media globally for access by index
+            window.currentProductMedia = media;
+
+            // Generate Thumbs
+            const thumbsHtml = media.map((m, i) => `
+                <img src="${m.url}" class="gallery-thumb ${i === 0 ? 'active' : ''}"
+                    onclick="changeMainMedia(${i}, this)" onerror="this.src='https://via.placeholder.com/100?text=Erro'">
+            `).join('');
+
+            // Main Media
+            const mainMediaHtml = media.length > 0
+                ? (media[0].type === 'video'
+                    ? `<video src="${media[0].url}" class="main-video" controls autoplay muted loop></video>`
+                    : `<img src="${media[0].url}" class="main-image" onerror="this.src='https://via.placeholder.com/600?text=Erro+Imagem'">`)
+                : `<img src="https://via.placeholder.com/600" class="main-image">`;
+
+            // Sizes
+            const sizesHtml = product.sizes && product.sizes.length > 0
+                ? product.sizes.map((s, i) => `<div class="size-option ${i === 0 ? 'active' : ''}" onclick="selectSize(this)">
+                    ${s}</div>`).join('')
+                : '<p>Tamanho único</p>';
+
+            // Colors
+            const colorsHtml = product.colors && product.colors.length > 0
+                ? product.colors.map((c, i) => `<div class="color-option ${i === 0 ? 'active' : ''}"
+                    style="background-color: ${getColorCode(c)}" title="${c}" onclick="selectColor(this)"></div>`).join('')
+                : '';
+
+            container.innerHTML = `
+                <div class="product-gallery">
+                    <div class="gallery-thumbs">
+                        ${thumbsHtml}
+                    </div>
+                    <div class="main-image-container" id="main-media-container">
+                        ${mainMediaHtml}
+                    </div>
+                </div>
+
+                <div class="product-details">
+                    <h1 class="product-title text-display">${product.name}</h1>
+                    <div class="product-price">
+                        ${product.old_price
+                    ? `<span class="old-price">${app.formatCurrency(product.old_price)}</span>
+                               <span class="current-price">${app.formatCurrency(product.price)}</span>
+                               <span class="pix-discount">10% OFF no PIX</span>`
+                    : `<span class="current-price">${app.formatCurrency(product.price)}</span>
+                               <span class="pix-discount">10% OFF no PIX</span>`
+                }
+                    </div>
+
+                    <div class="selector-group">
+                        <label class="selector-label">Tamanho</label>
+                        <div class="size-options" id="size-selector">
+                            ${sizesHtml}
+                        </div>
+                        ${product.has_size_guide ? `<button class="btn-link" onclick="openSizeGuide()" style="margin-top: 10px; font-size: 0.9rem; background:none; border:none; cursor:pointer; text-decoration:underline;"><i class="fas fa-ruler"></i> Guia de Medidas</button>` : ''}
+                    </div>
+
+                    ${colorsHtml ? `
+                    <div class="selector-group">
+                        <label class="selector-label">Cor</label>
+                        <div class="color-options" id="color-selector">
+                            ${colorsHtml}
+                        </div>
+                    </div>` : ''}
+
+                    <div class="selector-group">
+                        <label class="selector-label">Quantidade</label>
+                        <div style="display: flex; align-items: center; border: 1px solid #ddd; width: fit-content; border-radius: 4px;">
+                            <button onclick="updateQty(-1)" style="padding: 10px 15px; background: none; border: none; cursor: pointer;">-</button>
+                            <input type="number" id="qty-input" value="1" min="1" style="width: 50px; text-align: center; border: none; -moz-appearance: textfield;">
+                            <button onclick="updateQty(1)" style="padding: 10px 15px; background: none; border: none; cursor: pointer;">+</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-add-cart" onclick="addToCart()">
+                        <i class="fas fa-shopping-bag"></i> Adicionar à Sacola
+                    </button>
+
+                    <div class="product-description">
+                        <h3>Descrição</h3>
+                        <p>${product.description ? product.description.replace(/\n/g, '<br>') : 'Sem descrição.'}</p>
+                    </div>
+
+                    <div id="product-reviews-container" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #eee;"></div>
+                </div>
+            `;
+        }
+
+        // Helper Functions
+        window.changeMainMedia = (index, thumb) => {
+            const container = document.getElementById('main-media-container');
+            const mediaItem = window.currentProductMedia[index];
+
+            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+
+            if (mediaItem.type === 'video') {
+                container.innerHTML = `<video src="${mediaItem.url}" class="main-video" controls autoplay muted loop></video>`;
+            } else {
+                container.innerHTML = `<img src="${mediaItem.url}" class="main-image" onerror="this.src='https://via.placeholder.com/600?text=Erro+Imagem'">`;
+            }
+        };
+
+        window.selectSize = (el) => {
+            document.querySelectorAll('.size-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        window.selectColor = (el) => {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        window.updateQty = (change) => {
+            const input = document.getElementById('qty-input');
+            let val = parseInt(input.value) + change;
+            if (val < 1) val = 1;
+            input.value = val;
+        };
+
+        window.openSizeGuide = () => {
+            const product = window.currentProduct;
+            if (product && product.size_guide) {
+                renderSizeGuideTable(product.size_type || 'clothing', product.size_guide);
+            }
+            document.getElementById('size-modal').style.display = 'flex';
+        };
+
+        window.addToCart = () => {
+            const sizeEl = document.querySelector('.size-option.active');
+            const colorEl = document.querySelector('.color-option.active');
+            const qty = parseInt(document.getElementById('qty-input').value);
+
+            if (window.currentProduct.sizes && window.currentProduct.sizes.length > 0 && !sizeEl && window.currentProduct.sizeType !== 'unique') {
+                alert('Por favor, selecione um tamanho.');
+                return;
+            }
+
+            const item = {
+                ...window.currentProduct,
+                selectedSize: sizeEl ? sizeEl.textContent.trim() : null,
+                selectedColor: colorEl ? colorEl.title : (window.currentProduct.colors ? window.currentProduct.colors[0] : null),
+                quantity: qty
+            };
+
+            app.addToCart(item);
+        };
+
+        function getColorCode(colorName) {
+            if (!colorName) return '#cccccc';
+
+            // If it's a hex code, return it directly
+            if (colorName.startsWith('#')) return colorName;
+
+            // Normalize to lowercase for case-insensitive matching
+            const lowerName = colorName.toLowerCase().trim();
+
+            const colors = {
+                'preto': '#000000',
+                'branco': '#ffffff',
+                'azul': '#0000ff',
+                'vermelho': '#ff0000',
+                'verde': '#008000',
+                'cinza': '#808080',
+                'bege': '#f5f5dc',
+                'rosa': '#ffc0cb',
+                'amarelo': '#ffff00',
+                'laranja': '#ffa500',
+                'roxo': '#800080',
+                'marrom': '#a52a2a',
+                'azul marinho': '#000080',
+                'vinho': '#800000',
+                'azul bebê': '#89cff0',
+                'rosa bebê': '#f4c2c2',
+                'verde militar': '#4b5320',
+                'verde musgo': '#8a9a5b',
+                'verde limão': '#32cd32',
+                'azul royal': '#4169e1',
+                'azul turquesa': '#00ced1',
+                'coral': '#ff7f50',
+                'dourado': '#ffd700',
+                'prata': '#c0c0c0',
+                'grafite': '#36454f',
+                'nude': '#e3bc9a',
+                'off white': '#f8f8ff',
+                'off-white': '#f8f8ff',
+                'areia': '#f4a460',
+                'bordo': '#800000',
+                'bordô': '#800000',
+                'fúcsia': '#ff00ff',
+                'lilás': '#c8a2c8',
+                'salmão': '#fa8072',
+                'terracota': '#e2725b',
+                'mostarda': '#ffdb58',
+                'caramelo': '#c68e17',
+                'creme': '#fffdd0',
+                'caqui': '#f0e68c',
+                'jeans': '#5d76cb',
+                'jeans claro': '#8da3e0',
+                'jeans escuro': '#2c3e50'
+            };
+
+            // Return mapped color, or try to use the name directly (for standard CSS names like 'red', 'blue'), or default to gray
+            return colors[lowerName] || colorName;
+        }
+
+        async function renderRelatedProducts(currentProduct) {
+            const container = document.getElementById('related-products');
+            if (!container) return;
+
+            // Use server-side filtering if possible, or fetch a small batch
+            // For now, let's assume we fetch by category
+            let products = await db.getProducts({ category: currentProduct.category_id, limit: 5 });
+
+            // Filter out current product
+            products = products.filter(p => p.id !== currentProduct.id).slice(0, 4);
+
+            if (products.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Nenhum produto relacionado encontrado.</p>';
+                return;
+            }
+
+            container.innerHTML = products.map(product => {
+                const img = (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/300');
+                const link = product.slug ? `product.html?slug=${product.slug}` : `product.html?id=${product.id}`;
+
+                return `
+                <div class="product-card" onclick="window.location.href='${link}'">
+                    <div class="product-image">
+                        <img src="${img}" alt="${product.name}">
+                        <div class="product-actions">
+                            <button onclick="event.stopPropagation(); window.location.href='${link}'">
+                                <i class="fas fa-eye"></i> Ver Detalhes
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <div class="price">
+                            <span class="current-price">${app.formatCurrency(product.price)}</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function renderSizeGuideTable(type, data) {
+            const container = document.getElementById('size-table-container');
+            if (!container) return;
+
+            let html = '';
+            if (type === 'clothing') {
+                const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
+                html = `
+                    <table class="size-table">
+                        <thead>
+                            <tr>
+                                <th>Tamanho</th>
+                                <th>Tórax (cm)</th>
+                                <th>Cintura (cm)</th>
+                                <th>Quadril (cm)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sizes.map(size => {
+                    const row = data ? data.find(r => r.size === size) : null;
+                    if (!row) return ''; // Skip empty rows or show dashes? Let's skip for cleaner view or show dashes
+                    return `
+                                <tr>
+                                    <td><strong>${size}</strong></td>
+                                    <td>${row.chest || '-'}</td>
+                                    <td>${row.waist || '-'}</td>
+                                    <td>${row.hips || '-'}</td>
+                                </tr>
+                            `}).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else if (type === 'sneakers') {
+                const sizes = [];
+                for (let i = 34; i <= 44; i++) sizes.push(i.toString());
+                html = `
+                    <table class="size-table">
+                        <thead>
+                            <tr>
+                                <th>Tamanho</th>
+                                <th>Comprimento do Pé (cm)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sizes.map(size => {
+                    const row = data ? data.find(r => r.size === size) : null;
+                    if (!row) return '';
+                    return `
+                                <tr>
+                                    <td><strong>${size}</strong></td>
+                                    <td>${row.length || '-'}</td>
+                                </tr>
+                            `}).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                html = '<p>Tabela de medidas não disponível.</p>';
+            }
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>

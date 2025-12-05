@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categoria | SEVEN OUTLET PREMIUM</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Oswald:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+    <!-- Promo Bar -->
+    <div class="promo-bar text-center">
+        <p>ENTREGA EXPRESS POR MOTOBOY EM ATÉ 4 HORAS EM SP | ENTREGA EM TODO O BRASIL</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header sticky">
+        <div class="container header-inner">
+            <div class="logo">
+                <a href="index.html" class="text-display">SEVEN<span style="color: var(--color-red);">.</span></a>
+            </div>
+
+            <nav class="nav-desktop">
+                <ul>
+                    <!-- Injected by nav.js -->
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a href="#" class="search-trigger"><i class="fas fa-search"></i></a>
+                <a href="account.html" class="account-link"><i class="far fa-user"></i></a>
+                <a href="checkout.html" class="cart-trigger">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count">0</span>
+                </a>
+                <button class="mobile-menu-trigger"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-overlay"></div>
+    <nav class="mobile-nav">
+        <ul>
+            <!-- Injected by nav.js -->
+        </ul>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header-section" style="background: #f4f4f4; padding: 60px 0; text-align: center;">
+        <div class="container">
+            <h1 class="text-display" id="category-title">Carregando...</h1>
+            <p id="category-subtitle" style="color: #666; max-width: 600px; margin: 10px auto;">Explore nossa seleção
+                exclusiva.</p>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <section class="section">
+        <div class="container">
+            <!-- Filters (Simplified) -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                <span id="results-count">0 produtos encontrados</span>
+                <select id="sort-select" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="newest">Mais Recentes</option>
+                    <option value="price-asc">Menor Preço</option>
+                    <option value="price-desc">Maior Preço</option>
+                </select>
+            </div>
+
+            <div class="products-grid" id="products-grid">
+                <!-- Products injected by JS -->
+            </div>
+
+            <div id="no-products" style="text-align: center; padding: 50px; display: none;">
+                <i class="fas fa-search" style="font-size: 3rem; color: #ddd; margin-bottom: 20px;"></i>
+                <h3>Nenhum produto encontrado</h3>
+                <input type="text" class="search-input" placeholder="O que você procura?">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h3 class="text-display">Seven.</h3>
+                <p>COMPRA 100% SEGURA<br> Receba em Casa</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/sevenoutletpremium/" target="_blank"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/5511996224378" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Ajuda</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Página de FAQ em construção'); return false;">FAQ</a></li>
+                    <li><a href="#" onclick="alert('Página de Entregas em construção'); return false;">Entregas</a></li>
+                    <li><a href="#" onclick="alert('Página de Trocas em construção'); return false;">Trocas e
+                            Devoluções</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Institucional</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Página Sobre Nós em construção'); return false;">Sobre Nós</a></li>
+                    <li><a href="#" onclick="alert('Página de Privacidade em construção'); return false;">Política de
+                            Privacidade</a></li>
+                </ul>
+            </div>
+            <div class="footer-col newsletter">
+                <h4>Newsletter</h4>
+                <p>Receba ofertas exclusivas.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Obrigado por se inscrever!');">
+                    <input type="email" placeholder="Seu e-mail">
+                    <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2025 Seven Outlet Premium. Todos os direitos reservados.</p>
+            <div class="payment-icons">
+                <i class="fas fa-qrcode"></i> <!-- Pix -->
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay">
+        <div class="search-container">
+            <button class="close-search"><i class="fas fa-times"></i></button>
+            <input type="text" class="search-input" placeholder="O que você procura?">
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-init.js"></script>
+    <script src="assets/js/db.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/nav.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('category');
+            const search = params.get('search');
+            const grid = document.getElementById('products-grid');
+            const title = document.getElementById('category-title');
+            const count = document.getElementById('results-count');
+            const noProducts = document.getElementById('no-products');
+            const sortSelect = document.getElementById('sort-select');
+
+            // Async Fetch with Filters
+            // Now we fetch only what we need from the DB
+            let products = await db.getProducts({
+                category: category,
+                search: search
+            });
+
+            // Filter active products (unless we add this to DB query later)
+            products = products.filter(p => p.active !== false);
+
+            // Update Title
+            if (search) {
+                title.textContent = `Busca: "${search}"`;
+            } else if (category) {
+                const catMap = {
+                    'novidades': 'Novidades',
+                    'masculino': 'Masculino',
+                    'feminino': 'Feminino',
+                    'acessorios': 'Acessórios',
+                    'colecoes': 'Coleções',
+                    'outlet': 'Outlet',
+                    'destaques': 'Destaques',
+                    'mais-vendidos': 'Mais Vendidos'
+                };
+                title.textContent = catMap[category] || category.charAt(0).toUpperCase() + category.slice(1);
+            } else {
+                title.textContent = 'Todos os Produtos';
+            }
+
+            // Sort Function
+            function sortProducts() {
+                const sort = sortSelect.value;
+                if (sort === 'price-asc') {
+                    products.sort((a, b) => (a.price) - (b.price));
+                } else if (sort === 'price-desc') {
+                    products.sort((a, b) => (b.price) - (a.price));
+                } else if (sort === 'newest') {
+                    products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                }
+                render();
+            }
+
+            sortSelect.addEventListener('change', sortProducts);
+
+            function render() {
+                grid.innerHTML = '';
+                count.textContent = `${products.length} produtos encontrados`;
+
+                if (products.length === 0) {
+                    noProducts.style.display = 'block';
+                    return;
+                }
+
+                noProducts.style.display = 'none';
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    // Use slug if available, else ID
+                    const link = product.slug ? `product.html?slug=${product.slug}` : `product.html?id=${product.id}`;
+                    card.onclick = () => window.location.href = link;
+
+                    const img = (product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/300');
+
+                    card.innerHTML = `
+                        <div class="product-image">
+                            <img src="${img}" alt="${product.name}">
+                            ${product.is_new ? '<span class="badge new">Novo</span>' : ''}
+                            ${product.old_price ? '<span class="badge promo">Promo</span>' : ''}
+                            <div class="product-actions">
+                                <button onclick="event.stopPropagation(); addToCartHelper('${product.id}')">
+                                    <i class="fas fa-shopping-bag"></i> Adicionar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <div class="price">
+                                ${product.old_price ?
+                            `<span class="old-price">${app.formatCurrency(product.old_price)}</span>
+                             <span class="current-price">${app.formatCurrency(product.price)}</span>`
+                            :
+                            `<span class="current-price">${app.formatCurrency(product.price)}</span>`
+                        }
+                                <span style="font-size: 0.8rem; color: #28a745; margin-left: 5px; font-weight: 600;">Via PIX</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            // Initial Render
+            sortProducts();
+        });
+
+        async function addToCartHelper(productId) {
+            const product = await db.getProduct(productId);
+            if (product) {
+                app.addToCart({
+                    ...product,
+                    selectedSize: product.sizes && product.sizes.length ? product.sizes[0] : '',
+                    selectedColor: product.colors && product.colors.length ? product.colors[0] : '',
+                    quantity: 1
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

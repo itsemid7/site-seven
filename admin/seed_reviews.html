@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seeding Reviews...</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        #log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Seeding Reviews</h2>
+    <div id="status">Initializing...</div>
+    <div id="log"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-init.js"></script>
+    <script>
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            if (type === 'error') div.className = 'error';
+            if (type === 'success') div.className = 'success';
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(msg);
+        }
+
+        const firstNames = [
+            'Ana', 'Bruno', 'Carlos', 'Daniela', 'Eduardo', 'Fernanda', 'Gabriel', 'Helena', 'Igor', 'Julia',
+            'Kaique', 'Larissa', 'Marcelo', 'Natalia', 'Otavio', 'Paula', 'Rafael', 'Sabrina', 'Thiago', 'Vanessa',
+            'Lucas', 'Matheus', 'Pedro', 'Gustavo', 'Felipe', 'Mariana', 'Beatriz', 'Camila', 'Luana', 'Amanda',
+            'João', 'Maria', 'José', 'Francisco', 'Antônio', 'Paulo', 'Luiz', 'Marcos', 'Diego', 'Roberto'
+        ];
+
+        const lastNames = [
+            'Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes',
+            'Costa', 'Ribeiro', 'Martins', 'Carvalho', 'Almeida', 'Lopes', 'Soares', 'Fernandes', 'Vieira', 'Barbosa',
+            'Rocha', 'Dias', 'Nascimento', 'Andrade', 'Moreira', 'Nunes', 'Marques', 'Machado', 'Mendes', 'Freitas'
+        ];
+
+        const comments = [
+            'Produto excelente, superou minhas expectativas! A qualidade é incrível.',
+            'Chegou super rápido e muito bem embalado. Recomendo a loja!',
+            'Gostei bastante, o tamanho ficou perfeito. Comprarei novamente.',
+            'Ótimo custo-benefício. O tecido é muito confortável.',
+            'Perfeito! Exatamente como na foto. Estou muito satisfeito.',
+            'Adorei! O caimento é ótimo e a cor é linda.',
+            'Material de primeira qualidade. Valeu cada centavo.',
+            'Entrega expressa funcionou mesmo! Chegou no mesmo dia.',
+            'Satisfeito com a compra. O atendimento também foi nota 10.',
+            'Lindo, igual à foto. Ficou ótimo no corpo.',
+            'Muito bom, recomendo para todos. Qualidade Seven é diferenciada.',
+            'Amei! Já quero outras cores.',
+            'Produto top! Estiloso e confortável.',
+            'Surpreendeu positivamente. Acabamento impecável.',
+            'Chegou antes do prazo previsto. Muito bom!',
+            'A peça é linda e veste super bem.',
+            'Qualidade garantida. Virei cliente fiel.',
+            'Tudo certo com o pedido. Recomendo.',
+            'Gostei muito, parabéns pelo capricho.',
+            'Show de bola! Produto muito style.'
+        ];
+
+        async function seed() {
+            try {
+                // 1. Check if reviews table exists
+                const { error: checkError } = await window.supabaseClient.from('reviews').select('id').limit(1);
+                if (checkError && checkError.code === '42P01') { // undefined_table
+                    log('Error: Table "reviews" does not exist. Please run the SQL script first.', 'error');
+                    statusEl.textContent = 'Failed: Table missing';
+                    return;
+                }
+
+                // 2. Get Products
+                const { data: products, error: prodError } = await window.supabaseClient
+                    .from('products')
+                    .select('id, name');
+
+                if (prodError) throw prodError;
+
+                log(`Found ${products.length} products.`);
+
+                for (const product of products) {
+                    // Check existing reviews
+                    const { count, error: countError } = await window.supabaseClient
+                        .from('reviews')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('product_id', product.id);
+
+                    if (countError) {
+                        log(`Error checking reviews for ${product.name}: ${countError.message}`, 'error');
+                        continue;
+                    }
+
+                    if (count > 0) {
+                        log(`Skipping ${product.name} (already has ${count} reviews)`);
+                        continue;
+                    }
+
+                    // Generate Reviews
+                    const reviewCount = Math.floor(Math.random() * 6) + 3;
+                    const reviewsToInsert = [];
+                    let totalRating = 0;
+
+                    for (let i = 0; i < reviewCount; i++) {
+                        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                        const comment = comments[Math.floor(Math.random() * comments.length)];
+
+                        let rating = Math.floor(Math.random() * 3) + 3;
+                        if (rating < 4 && Math.random() < 0.8) rating = 5;
+
+                        totalRating += rating;
+
+                        const daysAgo = Math.floor(Math.random() * 60);
+                        const date = new Date();
+                        date.setDate(date.getDate() - daysAgo);
+
+                        reviewsToInsert.push({
+                            product_id: product.id,
+                            user_name: `${firstName} ${lastName}`,
+                            rating: rating,
+                            comment: comment,
+                            created_at: date.toISOString()
+                        });
+                    }
+
+                    const { error: insertError } = await window.supabaseClient
+                        .from('reviews')
+                        .insert(reviewsToInsert);
+
+                    if (insertError) {
+                        log(`Failed to insert reviews for ${product.name}: ${insertError.message}`, 'error');
+                    } else {
+                        log(`Added ${reviewCount} reviews for ${product.name}`, 'success');
+
+                        // Update product stats
+                        const avgRating = totalRating / reviewCount;
+                        await window.supabaseClient
+                            .from('products')
+                            .update({
+                                reviews: reviewCount,
+                                rating: avgRating
+                            })
+                            .eq('id', product.id);
+                    }
+                }
+
+                log('Seeding completed!', 'success');
+                statusEl.textContent = 'Completed';
+
+            } catch (e) {
+                log(`Fatal Error: ${e.message}`, 'error');
+                statusEl.textContent = 'Failed';
+            }
+        }
+
+        // Start
+        setTimeout(seed, 1000);
+    </script>
+</body>
+
+</html>

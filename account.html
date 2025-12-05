@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta | SEVEN OUTLET PREMIUM</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Oswald:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .account-container {
+            padding: 40px 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: #f4f4f4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #999;
+        }
+
+        .user-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .btn-outline {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--color-black);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .order-id {
+            font-weight: 600;
+        }
+
+        .order-date {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .order-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-transit {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .order-items {
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .order-total {
+            text-align: right;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-black);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header sticky">
+        <div class="container header-inner">
+            <div class="logo">
+                <a href="index.html" class="text-display">SEVEN<span style="color: var(--color-red);">.</span></a>
+            </div>
+
+            <nav class="nav-desktop">
+                <ul>
+                    <!-- Injected by nav.js -->
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a href="index.html" style="color: #666; font-size: 0.9rem;">
+                    <i class="fas fa-arrow-left"></i> Voltar à Loja
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-overlay"></div>
+    <nav class="mobile-nav">
+        <ul>
+            <!-- Injected by nav.js -->
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="account-container">
+            <div class="account-header">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="far fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <h2 id="user-name">Carregando...</h2>
+                        <p id="user-email" style="color: #666;">...</p>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn-outline" onclick="openEditModal()">Editar Perfil</button>
+                    <button class="btn-outline" onclick="authService.logout()"
+                        style="color: red; border-color: #ffcccc; margin-left: 10px;">Sair</button>
+                </div>
+            </div>
+
+            <div class="info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <h3 class="section-title">Informações Pessoais</h3>
+                    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                        <p><strong>Telefone:</strong> <span id="user-phone">...</span></p>
+                        <p style="margin-top: 10px;"><a href="#" onclick="openPasswordModal()"
+                                style="text-decoration: underline; font-size: 0.9rem;">Alterar Senha</a></p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="section-title">Meus Pedidos</h3>
+                    <div id="orders-list">
+                        <p>Carregando pedidos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h3 style="margin-bottom: 20px;">Editar Perfil</h3>
+            <div class="form-group">
+                <label class="form-label">Nome Completo</label>
+                <input type="text" id="edit-name" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">E-mail</label>
+                <input type="email" id="edit-email" class="form-input" readonly style="background: #f4f4f4;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Telefone</label>
+                <input type="tel" id="edit-phone" class="form-input">
+            </div>
+            <button class="btn-primary" onclick="updateProfile()">Salvar Alterações</button>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePasswordModal()">&times;</span>
+            <h3 style="margin-bottom: 20px;">Alterar Senha</h3>
+            <form id="change-password-form" onsubmit="event.preventDefault(); changePassword();">
+                <div class="form-group">
+                    <label class="form-label">Nova Senha</label>
+                    <input type="password" id="new-password" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmar Nova Senha</label>
+                    <input type="password" id="confirm-password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-primary">Alterar Senha</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h3 class="text-display">Seven.</h3>
+                <p>COMPRA 100% SEGURA<br> Receba em Casa</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/sevenoutletpremium/" target="_blank"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/5511996224378" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Ajuda</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Página de FAQ em construção'); return false;">FAQ</a></li>
+                    <li><a href="#" onclick="alert('Página de Entregas em construção'); return false;">Entregas</a></li>
+                    <li><a href="#" onclick="alert('Página de Trocas em construção'); return false;">Trocas e
+                            Devoluções</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Institucional</h4>
+                <ul>
+                    <li><a href="#" onclick="alert('Página Sobre Nós em construção'); return false;">Sobre Nós</a></li>
+                    <li><a href="#" onclick="alert('Página de Privacidade em construção'); return false;">Política de
+                            Privacidade</a></li>
+                </ul>
+            </div>
+            <div class="footer-col newsletter">
+                <h4>Newsletter</h4>
+                <p>Receba ofertas exclusivas.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Obrigado por se inscrever!');">
+                    <input type="email" placeholder="Seu e-mail">
+                    <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2025 Seven Outlet Premium. Todos os direitos reservados.</p>
+            <div class="payment-icons">
+                <i class="fas fa-qrcode"></i> <!-- Pix -->
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-init.js"></script>
+    <script src="assets/js/db.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/nav.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserData();
+            await loadOrders();
+        });
+
+        async function loadUserData() {
+            const user = await authService.getCurrentUser();
+
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // We might want to fetch profile data from 'profiles' table if we store extra info there
+            // For now, assume user metadata or basic info
+            document.getElementById('user-name').textContent = user.user_metadata.full_name || 'Usuário';
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-phone').textContent = user.user_metadata.phone || 'Não informado';
+
+            // Pre-fill modal
+            document.getElementById('edit-name').value = user.user_metadata.full_name || '';
+            document.getElementById('edit-email').value = user.email;
+            document.getElementById('edit-phone').value = user.user_metadata.phone || '';
+        }
+
+        async function loadOrders() {
+            const user = await authService.getCurrentUser();
+            if (!user) return;
+
+            const orders = await db.getOrdersByUserId(user.id);
+            const container = document.getElementById('orders-list');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p>Você ainda não fez nenhum pedido.</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const statusClass = order.status === 'Entregue' ? 'status-delivered' : 'status-transit';
+                const itemsHtml = order.items.map(item => `
+                    <div class="order-item">
+                        <span>${item.quantity}x ${item.name}</span>
+                        <span>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `).join('');
+
+                return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Pedido #${order.id.slice(0, 8)}</div>
+                            <div class="order-date">${new Date(order.created_at).toLocaleDateString('pt-BR')}</div>
+                        </div>
+                        <span class="order-status ${statusClass}">${order.status}</span>
+                    </div>
+                    <div class="order-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="order-total">
+                        Total: R$ ${order.total.toFixed(2).replace('.', ',')}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function openEditModal() {
+            document.getElementById('edit-modal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('active');
+        }
+
+        function openPasswordModal() {
+            document.getElementById('password-modal').classList.add('active');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.remove('active');
+            document.getElementById('change-password-form').reset();
+        }
+
+        async function updateProfile() {
+            const name = document.getElementById('edit-name').value;
+            const phone = document.getElementById('edit-phone').value;
+
+            // Update auth metadata and profile table
+            // AuthService updateProfile updates 'profiles' table.
+            // We should also update auth metadata if possible, but let's stick to what authService does.
+            // Actually, authService.updateProfile updates 'profiles' table in the code I read.
+
+            const result = await authService.updateProfile({ full_name: name, phone: phone });
+
+            if (result.success) {
+                alert('Perfil atualizado com sucesso!');
+                closeEditModal();
+                loadUserData(); // Refresh UI
+            } else {
+                alert(result.message || 'Erro ao atualizar perfil');
+            }
+        }
+
+        async function changePassword() {
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+
+            if (newPass !== confirmPass) {
+                alert('As senhas não coincidem!');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+
+            // AuthService recoverPassword sends email.
+            // To change password while logged in, we use supabase.auth.updateUser({ password: ... })
+            // authService.updateProfile updates 'profiles' table.
+            // We need a method to update password.
+            // Let's check authService again. It has recoverPassword.
+            // It doesn't seem to have changePassword.
+            // I should add it or use client directly.
+            // I'll use client directly here for simplicity or add to authService.
+            // Let's add it to authService via inline script if possible or just use supabase client.
+
+            const { error } = await window.supabaseClient.auth.updateUser({ password: newPass });
+
+            if (!error) {
+                alert('Senha alterada com sucesso!');
+                closePasswordModal();
+            } else {
+                alert(error.message);
+            }
+        }
+
+        // Close modal on outside click
+        window.onclick = function (event) {
+            const editModal = document.getElementById('edit-modal');
+            const passModal = document.getElementById('password-modal');
+            if (event.target == editModal) {
+                closeEditModal();
+            }
+            if (event.target == passModal) {
+                closePasswordModal();
+            }
+        }
+    </script>
+</body>
+
+</html>

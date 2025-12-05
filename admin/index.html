@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard | Admin SEVEN</title>
+        <link rel="stylesheet" href="../assets/css/admin.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+
+<body>
+    <div class="admin-container">
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="overlay" id="mobile-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3 style="margin: 0;">SEVEN<span style="color: var(--color-red);">.</span></h3>
+                <p style="font-size: 0.8rem; color: #666;">Painel Administrativo</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Pedidos</a></li>
+                <li><a href="products.html"><i class="fas fa-box"></i> Produtos</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> Categorias</a></li>
+                <li><a href="users.html"><i class="fas fa-users"></i> Usuários</a></li>
+                <li><a href="freight.html"><i class="fas fa-truck"></i> Frete</a></li>
+                <li><a href="banners.html"><i class="fas fa-images"></i> Banners</a></li>
+                <li><a href="../index.html" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Loja</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" onclick="db.logout(); window.location.href='../login.html'"
+                    style="color: #ccc; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2 class="text-display">Dashboard</h2>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3 style="font-size: 1rem; color: #666; margin-bottom: 10px;">Total de Produtos</h3>
+                    <p class="text-display" style="font-size: 2.5rem;" id="total-products">0</p>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 1rem; color: #666; margin-bottom: 10px;">Total de Pedidos</h3>
+                    <p class="text-display" style="font-size: 2.5rem;" id="total-orders">0</p>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 1rem; color: #666; margin-bottom: 10px;">Usuários Cadastrados</h3>
+                    <p class="text-display" style="font-size: 2.5rem;" id="total-users">0</p>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 1rem; color: #666; margin-bottom: 10px;">Vendas (Hoje)</h3>
+                    <p class="text-display" style="font-size: 2.5rem;" id="today-sales">R$ 0,00</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 20px;">Ações Rápidas</h3>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="products.html" class="btn-primary" style="text-decoration: none;">Gerenciar Produtos</a>
+                    <a href="categories.html" class="btn-primary"
+                        style="text-decoration: none; background: #555;">Gerenciar
+                        Categorias</a>
+                    <button onclick="recoverData()" class="btn-primary" style="background: #dc3545;">Recuperar Dados de
+                        Demonstração</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-init.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Mobile Toggle Logic
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Dashboard Logic
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Fetch data in parallel
+                const [products, users, orders] = await Promise.all([
+                    db.getProducts(),
+                    db.getUsers(),
+                    db.getOrders()
+                ]);
+
+                // Update Counts
+                document.getElementById('total-products').textContent = products ? products.length : 0;
+                document.getElementById('total-users').textContent = users ? users.length : 0;
+                document.getElementById('total-orders').textContent = orders ? orders.length : 0;
+
+                // Calculate Sales Today
+                if (orders && orders.length > 0) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayOrders = orders.filter(order => {
+                        if (!order.created_at) return false;
+                        return order.created_at.startsWith(today);
+                    });
+
+                    const totalSales = todayOrders.reduce((sum, order) => {
+                        return sum + (parseFloat(order.total) || 0);
+                    }, 0);
+
+                    document.getElementById('today-sales').textContent = `R$ ${totalSales.toFixed(2).replace('.', ',')}`;
+                } else {
+                    document.getElementById('today-sales').textContent = 'R$ 0,00';
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do dashboard:', error);
+            }
+        });
+
+        function recoverData() {
+            if (confirm('ATENÇÃO: Isso irá apagar todos os dados atuais e restaurar os dados de demonstração originais. Deseja continuar?')) {
+                if (db.resetData) {
+                    const result = db.resetData();
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert('Função de reset não implementada no backend atual.');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Produtos | Admin SEVEN</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Product Specific Styles */
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item button {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: #e6f9e6;
+            color: #28a745;
+        }
+
+        .status-inactive {
+            background-color: #ffeeba;
+            color: #856404;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--color-black);
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-container">
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="overlay" id="mobile-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3 style="margin: 0;">SEVEN<span style="color: var(--color-red);">.</span></h3>
+                <p style="font-size: 0.8rem; color: #ccc;">Painel Administrativo</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Pedidos</a></li>
+                <li><a href="products.html" class="active"><i class="fas fa-box"></i> Produtos</a></li>
+                <li><a href="categories.html"><i class="fas fa-tags"></i> Categorias</a></li>
+                <li><a href="users.html"><i class="fas fa-users"></i> Usuários</a></li>
+                <li><a href="freight.html"><i class="fas fa-truck"></i> Frete</a></li>
+                <li><a href="banners.html"><i class="fas fa-images"></i> Banners</a></li>
+                <li><a href="../index.html" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Loja</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="#" onclick="db.logout(); window.location.href='../login.html'"
+                    style="color: #ccc; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2 class="text-display">Gerenciar Produtos</h2>
+                <div style="display: flex; gap: 10px;">
+                    <a href="compress_images.html" class="btn-primary" style="background: #6c757d;">
+                        <i class="fas fa-compress-arrows-alt"></i> Otimizar Imagens
+                    </a>
+                    <button class="btn-primary" onclick="openProductModal()">
+                        <i class="fas fa-plus"></i> Novo Produto
+                    </button>
+                </div>
+            </div>
+
+            <div id="loading-spinner" class="spinner" style="display: none;"></div>
+
+            <div class="table-wrapper">
+                <table class="data-table" id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="modal-title">Novo Produto</h3>
+                <button class="close-modal" onclick="closeProductModal()">&times;</button>
+            </div>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+
+                <div class="form-group">
+                    <label class="form-label">Nome do Produto</label>
+                    <input type="text" id="product-name" class="form-control" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Preço (R$)</label>
+                        <input type="text" id="product-price" class="form-control" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preço Antigo (Opcional)</label>
+                        <input type="text" id="product-old-price" class="form-control" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Categoria</label>
+                        <select id="product-category" class="form-control" required>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Peso (kg)</label>
+                        <input type="number" id="product-weight" class="form-control" step="0.001" placeholder="0.300">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipo de Tamanho</label>
+                    <select id="product-size-type" class="form-control" onchange="renderSizeOptions(this.value)">
+                        <option value="clothing">Roupas (P, M, G...)</option>
+                        <option value="sneakers">Tênis (34, 35, 36...)</option>
+                        <option value="unique">Tamanho Único</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tamanhos Disponíveis</label>
+                    <div id="size-options-container" class="checkbox-group" style="flex-wrap: wrap;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Size Guide Section -->
+                <div class="form-group"
+                    style="border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #fafafa;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="product-has-size-guide">
+                        <label for="product-has-size-guide" style="font-weight: 600;">Possui Guia de Medidas?</label>
+                    </div>
+                    <div id="size-guide-container" style="display: none; margin-top: 15px;">
+                        <div id="size-guide-table-container"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cores (Separadas por vírgula)</label>
+                    <input type="text" id="product-colors" class="form-control" placeholder="Ex: Preto, Branco, Azul">
+                    <div id="colors-preview" style="display: flex; gap: 5px; margin-top: 5px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Descrição</label>
+                    <textarea id="product-description" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Imagens</label>
+                    <input type="file" id="product-images" class="form-control" multiple accept="image/*">
+                    <div id="image-preview" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Vídeo (Opcional, Max 5MB)</label>
+                    <input type="file" id="product-video" class="form-control" accept="video/*">
+                    <div id="video-preview" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="product-active" checked>
+                        <label for="product-active">Ativo</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="product-featured">
+                        <label for="product-featured">Destaque</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="product-bestseller">
+                        <label for="product-bestseller">Mais Vendido</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="product-new">
+                        <label for="product-new">Novo</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary"
+                    style="width: 100%; margin-top: 20px; justify-content: center;">Salvar Produto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-init.js"></script>
+    <script src="../assets/js/db.js"></script>
+    <script>
+        // Mobile Toggle Logic
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // State
+        let currentImages = [];
+        let currentVideo = null;
+        let currentColors = [];
+
+        // Elements
+        const form = document.getElementById('product-form');
+        const modal = document.getElementById('product-modal');
+        const productsList = document.getElementById('products-list');
+        const imageInput = document.getElementById('product-images');
+        const imagePreview = document.getElementById('image-preview');
+        const colorsInput = document.getElementById('product-colors');
+        const colorsPreview = document.getElementById('colors-preview');
+        const sizeGuideCheckbox = document.getElementById('product-has-size-guide');
+        const sizeGuideContainer = document.getElementById('size-guide-container');
+        const sizeGuideTableContainer = document.getElementById('size-guide-table-container');
+
+        // Functions
+        function openProductModal(id = null) {
+            modal.style.display = 'flex';
+            if (id) {
+                document.getElementById('modal-title').innerText = 'Editar Produto';
+                loadProductData(id);
+            } else {
+                document.getElementById('modal-title').innerText = 'Novo Produto';
+                form.reset();
+                document.getElementById('product-id').value = '';
+                currentImages = [];
+                currentVideo = null;
+                currentColors = [];
+                renderImagePreview();
+                renderVideoPreview();
+                renderColors();
+                renderSizeOptions('clothing'); // Default
+
+                // Reset Size Guide
+                sizeGuideCheckbox.checked = false;
+                sizeGuideContainer.style.display = 'none';
+                sizeGuideTableContainer.innerHTML = '';
+            }
+            populateCategories();
+        }
+
+        function closeProductModal() {
+            modal.style.display = 'none';
+        }
+
+        async function populateCategories() {
+            const select = document.getElementById('product-category');
+            select.innerHTML = '<option value="">Carregando...</option>';
+            try {
+                const categories = await db.getCategories();
+                if (categories.length === 0) {
+                    select.innerHTML = '<option value="">Nenhuma categoria encontrada</option>';
+                    return;
+                }
+                select.innerHTML = '<option value="">Selecione uma categoria</option>' +
+                    categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                select.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+        }
+
+        // Render Products
+        async function renderProducts() {
+            const tbody = document.getElementById('products-list');
+            const spinner = document.getElementById('loading-spinner');
+
+            if (spinner) spinner.style.display = 'block';
+            if (tbody) tbody.innerHTML = '';
+
+            try {
+                const products = await db.getProducts();
+
+                if (!products || products.length === 0) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum produto encontrado.</td></tr>';
+                    return;
+                }
+
+                // Fetch categories for mapping
+                const categories = await db.getCategories();
+                const catMap = {};
+                categories.forEach(c => catMap[c.id] = c.name);
+
+                if (tbody) {
+                    tbody.innerHTML = products.map(p => `
+                        <tr>
+                            <td>
+                                <img src="${(p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://via.placeholder.com/50')}" 
+                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            </td>
+                            <td>${p.name}</td>
+                            <td>${catMap[p.category_id] || 'Sem Categoria'}</td>
+                            <td>R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</td>
+                            <td>${p.quantity || 'N/A'}</td>
+                            <td>
+                                <span class="status-badge ${p.active ? 'status-active' : 'status-inactive'}">
+                                    ${p.active ? 'Ativo' : 'Inativo'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="action-btn" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Erro ao carregar produtos.</td></tr>';
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+            }
+        }
+
+        // Load Product Data for Edit
+        async function loadProductData(id) {
+            try {
+                const products = await db.getProducts();
+                const product = products.find(p => p.id === id);
+                if (!product) return;
+
+                document.getElementById('product-id').value = product.id;
+                document.getElementById('product-name').value = product.name;
+                document.getElementById('product-price').value = product.price;
+                document.getElementById('product-old-price').value = product.old_price || '';
+                document.getElementById('product-category').value = product.category_id;
+                document.getElementById('product-weight').value = product.weight || '';
+                document.getElementById('product-active').checked = product.active;
+                document.getElementById('product-featured').checked = product.is_featured;
+                document.getElementById('product-bestseller').checked = product.is_bestseller;
+                document.getElementById('product-new').checked = product.is_new;
+                document.getElementById('product-description').value = product.description || '';
+                document.getElementById('product-size-type').value = product.size_type || 'clothing';
+
+                currentImages = product.images || (product.image ? [product.image] : []);
+                currentVideo = product.video;
+                currentColors = product.colors || [];
+
+                renderImagePreview();
+                renderVideoPreview();
+                renderColors();
+                renderSizeOptions(product.size_type || 'clothing', product.sizes);
+
+                // Size Guide
+                sizeGuideCheckbox.checked = product.has_size_guide;
+                sizeGuideContainer.style.display = product.has_size_guide ? 'block' : 'none';
+                if (product.has_size_guide && product.size_guide) {
+                    renderSizeGuideTable(product.size_type || 'clothing', product.size_guide, false);
+                } else {
+                    sizeGuideTableContainer.innerHTML = '';
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar produto para edição:', error);
+                alert('Erro ao carregar produto para edição.');
+            }
+        }
+
+        // Helper Functions
+        function renderImagePreview() {
+            imagePreview.innerHTML = currentImages.map((img, index) => `
+                <div class="preview-item">
+                    <img src="${img}">
+                    <button type="button" onclick="removeImage(${index})">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        window.removeImage = (index) => {
+            currentImages.splice(index, 1);
+            renderImagePreview();
+        };
+
+        function renderVideoPreview() {
+            const container = document.getElementById('video-preview');
+            if (!currentVideo) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = `
+                <div style="position: relative; display: inline-block;">
+                    <video src="${currentVideo}" controls style="max-width: 200px; max-height: 150px;"></video>
+                    <button type="button" onclick="removeVideo()" style="position: absolute; top: 0; right: 0; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;">&times;</button>
+                </div>
+            `;
+        }
+
+        window.removeVideo = () => {
+            currentVideo = null;
+            document.getElementById('product-video').value = '';
+            renderVideoPreview();
+        };
+
+        function renderColors() {
+            colorsPreview.innerHTML = currentColors.map((c, i) => `
+                <span style="background: #eee; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+                    ${c} <button type="button" onclick="removeColor(${i})" style="border: none; background: none; cursor: pointer; font-weight: bold;">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        window.removeColor = (i) => {
+            currentColors.splice(i, 1);
+            renderColors();
+        };
+
+        function renderSizeOptions(type, selectedSizes = []) {
+            const container = document.getElementById('size-options-container');
+            container.innerHTML = '';
+
+            let options = [];
+            if (type === 'clothing') {
+                options = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
+            } else if (type === 'sneakers') {
+                for (let i = 34; i <= 44; i++) options.push(i.toString());
+            } else {
+                options = ['Único'];
+            }
+
+            options.forEach(size => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.style.marginRight = '15px';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'sizes';
+                checkbox.value = size;
+                checkbox.id = `size-${size}`;
+                if (selectedSizes && selectedSizes.includes(size)) checkbox.checked = true;
+
+                const label = document.createElement('label');
+                label.htmlFor = `size-${size}`;
+                label.textContent = size;
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        function compressImage(file, maxWidth, maxHeight, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round(height * maxWidth / width);
+                            width = maxWidth;
+                        }
+                        if (height > maxHeight) {
+                            width = Math.round(width * maxHeight / height);
+                            height = maxHeight;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        // Size Guide Logic
+        const defaultClothingMeasurements = {
+            'PP': { chest: '82-86', waist: '66-70', hips: '88-92' },
+            'P': { chest: '88-92', waist: '72-76', hips: '92-96' },
+            'M': { chest: '96-100', waist: '80-84', hips: '100-104' },
+            'G': { chest: '104-108', waist: '88-92', hips: '108-112' },
+            'GG': { chest: '112-116', waist: '96-100', hips: '116-120' },
+            'XGG': { chest: '120-124', waist: '104-108', hips: '124-128' }
+        };
+
+        const defaultSneakerMeasurements = {
+            '34': { length: '22.5' },
+            '35': { length: '23.0' },
+            '36': { length: '23.5' },
+            '37': { length: '24.0' },
+            '38': { length: '25.0' },
+            '39': { length: '25.5' },
+            '40': { length: '26.5' },
+            '41': { length: '27.5' },
+            '42': { length: '28.0' },
+            '43': { length: '29.0' },
+            '44': { length: '30.0' }
+        };
+
+        if (sizeGuideCheckbox) {
+            sizeGuideCheckbox.addEventListener('change', (e) => {
+                sizeGuideContainer.style.display = e.target.checked ? 'block' : 'none';
+                if (e.target.checked) {
+                    const type = document.getElementById('product-size-type').value;
+                    if (!sizeGuideTableContainer.innerHTML.trim()) {
+                        renderSizeGuideTable(type);
+                    }
+                }
+            });
+        }
+
+        window.generateDefaultTable = () => {
+            const type = document.getElementById('product-size-type').value;
+            renderSizeGuideTable(type, null, true);
+        }
+
+        function renderSizeGuideTable(type, data = null, useDefaults = false) {
+            let html = '';
+
+            // Add Generate Button
+            const btnHtml = `
+                <div style="margin-bottom: 10px; text-align: right;">
+                    <button type="button" class="btn-primary" onclick="generateDefaultTable()" style="padding: 5px 10px; font-size: 0.8rem; background: #6c757d;">
+                        <i class="fas fa-magic"></i> Gerar Tabela Padrão
+                    </button>
+                </div>
+            `;
+
+            if (type === 'clothing') {
+                const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
+                html = btnHtml + `
+                    <table class="data-table" style="margin-top: 10px; font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th>Tamanho</th>
+                                <th>Tórax (cm)</th>
+                                <th>Cintura (cm)</th>
+                                <th>Quadril (cm)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sizes.map(size => {
+                    let row = data ? data.find(r => r.size === size) : null;
+                    if (!row && useDefaults) {
+                        row = { size, ...defaultClothingMeasurements[size] };
+                    }
+                    return `
+                                    <tr data-size="${size}">
+                                        <td>${size}</td>
+                                        <td><input type="text" class="form-control" data-col="chest" value="${row ? row.chest : ''}" placeholder="Ex: 88-92"></td>
+                                        <td><input type="text" class="form-control" data-col="waist" value="${row ? row.waist : ''}" placeholder="Ex: 72-76"></td>
+                                        <td><input type="text" class="form-control" data-col="hips" value="${row ? row.hips : ''}" placeholder="Ex: 92-96"></td>
+                                    </tr>
+                                `}).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else if (type === 'sneakers') {
+                const sizes = [];
+                for (let i = 34; i <= 44; i++) sizes.push(i.toString());
+                html = btnHtml + `
+                    <table class="data-table" style="margin-top: 10px; font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th>Tamanho</th>
+                                <th>Comprimento do Pé (cm)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sizes.map(size => {
+                    let row = data ? data.find(r => r.size === size) : null;
+                    if (!row && useDefaults) {
+                        row = { size, ...defaultSneakerMeasurements[size] };
+                    }
+                    return `
+                                    <tr data-size="${size}">
+                                        <td>${size}</td>
+                                        <td><input type="text" class="form-control" data-col="length" value="${row ? row.length : ''}" placeholder="Ex: 22.5"></td>
+                                    </tr>
+                                `}).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                html = '<p style="color: #666; font-style: italic;">Guia de medidas não disponível para Tamanho Único.</p>';
+            }
+            sizeGuideTableContainer.innerHTML = html;
+        }
+
+        function getSizeGuideData() {
+            if (!sizeGuideCheckbox.checked) return null;
+
+            const type = document.getElementById('product-size-type').value;
+            const rows = sizeGuideTableContainer.querySelectorAll('tbody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const size = row.getAttribute('data-size');
+                if (type === 'clothing') {
+                    data.push({
+                        size,
+                        chest: row.querySelector('[data-col="chest"]').value,
+                        waist: row.querySelector('[data-col="waist"]').value,
+                        hips: row.querySelector('[data-col="hips"]').value
+                    });
+                } else if (type === 'sneakers') {
+                    data.push({
+                        size,
+                        length: row.querySelector('[data-col="length"]').value
+                    });
+                }
+            });
+            return data;
+        }
+
+        // Event Listeners
+        imageInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            for (const file of files) {
+                try {
+                    const compressed = await compressImage(file, 800, 800, 0.8);
+                    currentImages.push(compressed);
+                } catch (error) {
+                    console.error('Erro ao processar imagem:', error);
+                }
+            }
+            renderImagePreview();
+            e.target.value = '';
+        });
+
+        colorsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const color = e.target.value.replace(',', '').trim();
+                if (color && !currentColors.includes(color)) {
+                    currentColors.push(color);
+                    renderColors();
+                }
+                e.target.value = '';
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const selectedSizes = Array.from(document.querySelectorAll('input[name="sizes"]:checked')).map(cb => cb.value);
+            const sizeGuideData = getSizeGuideData();
+
+            const product = {
+                id: document.getElementById('product-id').value || undefined,
+                name: document.getElementById('product-name').value,
+                price: parseFloat(document.getElementById('product-price').value.replace(',', '.')),
+                old_price: document.getElementById('product-old-price').value ? parseFloat(document.getElementById('product-old-price').value.replace(',', '.')) : null,
+                category_id: document.getElementById('product-category').value || null,
+                weight: document.getElementById('product-weight').value ? parseFloat(document.getElementById('product-weight').value) : 0,
+                active: document.getElementById('product-active').checked,
+                is_featured: document.getElementById('product-featured').checked,
+                is_bestseller: document.getElementById('product-bestseller').checked,
+                is_new: document.getElementById('product-new').checked,
+                description: document.getElementById('product-description').value,
+                images: currentImages,
+                video: currentVideo,
+                size_type: document.getElementById('product-size-type').value,
+                sizes: selectedSizes,
+                colors: currentColors,
+                has_size_guide: document.getElementById('product-has-size-guide').checked,
+                size_guide: sizeGuideData
+            };
+
+            // Generate slug
+            if (!product.slug) {
+                product.slug = product.name
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+
+            try {
+                if (product.id) {
+                    await db.updateProduct(product);
+                    alert('Produto atualizado com sucesso!');
+                } else {
+                    await db.addProduct(product);
+                    alert('Produto criado com sucesso!');
+                }
+                closeProductModal();
+                renderProducts();
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                alert('Erro ao salvar produto: ' + (error.message || JSON.stringify(error)));
+            }
+        });
+
+        window.editProduct = (id) => {
+            openProductModal(id);
+        };
+
+        window.deleteProduct = async (id) => {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                try {
+                    await db.deleteProduct(id);
+                    renderProducts();
+                } catch (error) {
+                    console.error('Erro ao excluir produto:', error);
+                    alert('Erro ao excluir produto.');
+                }
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            renderSizeOptions('clothing');
+            populateCategories();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+# OS junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node
+node_modules/
+dist/
+.env
+
+# Editor
+.vscode/
+.idea/
+
+# Custom Debug Files (Optional - keep if you want them in repo)
+# debug_*.html
+# calc.ps1
