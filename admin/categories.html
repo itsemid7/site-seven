@@ -372,41 +372,42 @@
                         closeCategoryModal();
                         await renderCategories();
                     } catch (error) {
-                        <script src="../assets/js/db.js"></script>
-            <script src="../assets/js/api.js"></script>
-            <script src="../assets/js/main.js"></script>
-            <script>
-                                // Mobile Toggle Logic
-                            const mobileBtn = document.getElementById('mobile-menu-btn');
-                            const sidebar = document.getElementById('sidebar');
-                            const overlay = document.getElementById('mobile-overlay');
+                        console.error('Erro ao salvar:', error);
+                        alert('Erro ao salvar categoria.');
+                    }
+                });
 
-                            if (mobileBtn) {
-                                mobileBtn.addEventListener('click', () => {
-                                    sidebar.classList.toggle('active');
-                                    overlay.classList.toggle('active');
-                                });
-                                }
+                // Mobile Toggle Logic
+                const mobileBtn = document.getElementById('mobile-menu-btn');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobile-overlay');
 
-                            if (overlay) {
-                                overlay.addEventListener('click', () => {
-                                    sidebar.classList.remove('active');
-                                    overlay.classList.remove('active');
-                                });
-                                }
+                if (mobileBtn) {
+                    mobileBtn.addEventListener('click', () => {
+                        sidebar.classList.toggle('active');
+                        overlay.classList.toggle('active');
+                    });
+                }
 
-                            // Category Management Logic
-                            async function renderCategories() {
-                                    const tbody = document.getElementById('categories-list');
-                            try {
-                                        const categories = await db.getCategories();
+                if (overlay) {
+                    overlay.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    });
+                }
 
-                            if (!categories || categories.length === 0) {
-                                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma categoria cadastrada.</td></tr>';
+                // Category Management Logic
+                async function renderCategories() {
+                    const tbody = document.getElementById('categories-list');
+                    try {
+                        const categories = await db.getCategories();
+
+                        if (!categories || categories.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma categoria cadastrada.</td></tr>';
                             return;
-                                        }
+                        }
 
-                                        tbody.innerHTML = categories.map(c => `
+                        tbody.innerHTML = categories.map(c => `
                             <tr>
                                 <td>
                                     ${c.image ? `<img src="${c.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` : '<span style="color:#ccc;">Sem img</span>'}
@@ -420,203 +421,203 @@
                                 </td>
                             </tr>
                             `).join('');
-                                    } catch (error) {
-                                console.error('Erro ao renderizar categorias:', error);
-                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar categorias.</td></tr>';
-                                    }
-                                }
+                    } catch (error) {
+                        console.error('Erro ao renderizar categorias:', error);
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar categorias.</td></tr>';
+                    }
+                }
 
-                            // Modal Functions
-                            const modal = document.getElementById('category-modal');
-                            const form = document.getElementById('category-form');
+                // Modal Functions
+                const modal = document.getElementById('category-modal');
+                const form = document.getElementById('category-form');
 
-                            function openCategoryModal(categoryId = null) {
-                                modal.style.display = 'flex';
-                            const container = document.getElementById('subcategories-container');
-                            container.innerHTML = '';
+                function openCategoryModal(categoryId = null) {
+                    modal.style.display = 'flex';
+                    const container = document.getElementById('subcategories-container');
+                    container.innerHTML = '';
 
-                            // Reset Image Inputs
-                            document.getElementById('category-image').value = '';
-                            document.getElementById('category-image-base64').value = '';
-                            document.getElementById('category-url').value = '';
-                            toggleCatUploadType();
+                    // Reset Image Inputs
+                    document.getElementById('category-image').value = '';
+                    document.getElementById('category-image-base64').value = '';
+                    document.getElementById('category-url').value = '';
+                    toggleCatUploadType();
 
-                            if (categoryId) {
-                                // Edit mode
-                                document.getElementById('modal-title').textContent = 'Editar Categoria';
-                                        // Load data logic handled in editCategory
-                                    } else {
-                                // Add mode
-                                document.getElementById('modal-title').textContent = 'Nova Categoria';
-                            form.reset();
-                            document.getElementById('category-id').value = '';
-                                    }
-                                }
+                    if (categoryId) {
+                        // Edit mode
+                        document.getElementById('modal-title').textContent = 'Editar Categoria';
+                        // Load data logic handled in editCategory
+                    } else {
+                        // Add mode
+                        document.getElementById('modal-title').textContent = 'Nova Categoria';
+                        form.reset();
+                        document.getElementById('category-id').value = '';
+                    }
+                }
 
-                            function closeCategoryModal() {
-                                modal.style.display = 'none';
-                                }
+                function closeCategoryModal() {
+                    modal.style.display = 'none';
+                }
 
-                            function toggleCatUploadType() {
-                                    const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
-                            const fileInput = document.getElementById('cat-file-input');
-                            const urlInput = document.getElementById('cat-url-input');
+                function toggleCatUploadType() {
+                    const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
+                    const fileInput = document.getElementById('cat-file-input');
+                    const urlInput = document.getElementById('cat-url-input');
 
-                            if (type === 'file') {
-                                fileInput.style.display = 'block';
-                            urlInput.style.display = 'none';
-                                    } else {
-                                fileInput.style.display = 'none';
-                            urlInput.style.display = 'block';
-                                    }
-                                }
+                    if (type === 'file') {
+                        fileInput.style.display = 'block';
+                        urlInput.style.display = 'none';
+                    } else {
+                        fileInput.style.display = 'none';
+                        urlInput.style.display = 'block';
+                    }
+                }
 
-                            // Image Processing
-                            document.getElementById('category-image').addEventListener('change', function (e) {
-                                    const file = e.target.files[0];
-                            if (file) {
-                                        const reader = new FileReader();
-                            reader.onload = function (e) {
-                                document.getElementById('category-image-base64').value = e.target.result;
-                                        };
-                            reader.readAsDataURL(file);
-                                    }
-                                });
+                // Image Processing
+                document.getElementById('category-image').addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            document.getElementById('category-image-base64').value = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
 
-                            // Subcategory Logic
-                            function addSubcategoryField(name = '', slug = '', id = null) {
-                                    const container = document.getElementById('subcategories-container');
-                            const div = document.createElement('div');
-                            div.className = 'subcategory-item';
-                            div.style.display = 'flex';
-                            div.style.gap = '10px';
-                            div.style.marginBottom = '10px';
+                // Subcategory Logic
+                function addSubcategoryField(name = '', slug = '', id = null) {
+                    const container = document.getElementById('subcategories-container');
+                    const div = document.createElement('div');
+                    div.className = 'subcategory-item';
+                    div.style.display = 'flex';
+                    div.style.gap = '10px';
+                    div.style.marginBottom = '10px';
 
-                            div.innerHTML = `
+                    div.innerHTML = `
                             <input type="hidden" class="sub-id" value="${id || ''}">
                                 <input type="text" class="form-control sub-name" placeholder="Nome" value="${name}" required style="flex: 1;">
                                     <input type="text" class="form-control sub-slug" placeholder="Slug (Auto)" value="${slug}" readonly style="background: #eee; flex: 1;">
                                         <button type="button" class="btn-primary" style="background: #dc3545; padding: 0 15px;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
             `;
 
-                                    // Auto-generate slug for subcategory
-                                    const nameInput = div.querySelector('.sub-name');
-                                    const slugInput = div.querySelector('.sub-slug');
+                    // Auto-generate slug for subcategory
+                    const nameInput = div.querySelector('.sub-name');
+                    const slugInput = div.querySelector('.sub-slug');
 
-                                    nameInput.addEventListener('input', () => {
-                                        slugInput.value = db.generateSlug(nameInput.value);
-                                    });
+                    nameInput.addEventListener('input', () => {
+                        slugInput.value = db.generateSlug(nameInput.value);
+                    });
 
-                                    container.appendChild(div);
-                                }
+                    container.appendChild(div);
+                }
 
-                                // Auto-generate slug for main category
-                                document.getElementById('category-name').addEventListener('input', (e) => {
-                                    document.getElementById('category-slug').value = db.generateSlug(e.target.value);
-                                });
+                // Auto-generate slug for main category
+                document.getElementById('category-name').addEventListener('input', (e) => {
+                    document.getElementById('category-slug').value = db.generateSlug(e.target.value);
+                });
 
-                                // Form Submit
-                                form.addEventListener('submit', async (e) => {
-                                    e.preventDefault();
+                // Form Submit
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
 
-                                    const subItems = document.querySelectorAll('.subcategory-item');
-                                    const subcategories = Array.from(subItems).map(item => ({
-                                        id: item.querySelector('.sub-id').value || Date.now() + Math.floor(Math.random() * 1000),
-                                        name: item.querySelector('.sub-name').value,
-                                        slug: item.querySelector('.sub-slug').value
-                                    }));
+                    const subItems = document.querySelectorAll('.subcategory-item');
+                    const subcategories = Array.from(subItems).map(item => ({
+                        id: item.querySelector('.sub-id').value || Date.now() + Math.floor(Math.random() * 1000),
+                        name: item.querySelector('.sub-name').value,
+                        slug: item.querySelector('.sub-slug').value
+                    }));
 
-                                    const categoryId = document.getElementById('category-id').value;
+                    const categoryId = document.getElementById('category-id').value;
 
-                                    // Handle Image
-                                    const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
-                                    let image = type === 'file'
-                                        ? document.getElementById('category-image-base64').value
-                                        : document.getElementById('category-url').value;
+                    // Handle Image
+                    const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
+                    let image = type === 'file'
+                        ? document.getElementById('category-image-base64').value
+                        : document.getElementById('category-url').value;
 
-                                    const category = {
-                                        name: document.getElementById('category-name').value,
-                                        slug: document.getElementById('category-slug').value,
-                                        subcategories: subcategories,
-                                        image: image // Add image
-                                    };
+                    const category = {
+                        name: document.getElementById('category-name').value,
+                        slug: document.getElementById('category-slug').value,
+                        subcategories: subcategories,
+                        image: image // Add image
+                    };
 
-                                    try {
-                                        if (categoryId) {
-                                            category.id = parseInt(categoryId);
-                                            await db.updateCategory(category);
-                                            alert('Categoria atualizada com sucesso!');
-                                        } else {
-                                            await db.addCategory(category);
-                                            alert('Categoria criada com sucesso!');
-                                        }
+                    try {
+                        if (categoryId) {
+                            category.id = parseInt(categoryId);
+                            await db.updateCategory(category);
+                            alert('Categoria atualizada com sucesso!');
+                        } else {
+                            await db.addCategory(category);
+                            alert('Categoria criada com sucesso!');
+                        }
 
-                                        closeCategoryModal();
-                                        await renderCategories();
-                                    } catch (error) {
-                                        console.error('Erro ao salvar categoria:', error);
-                                        alert('Erro ao salvar categoria: ' + (error.message || error));
-                                    }
-                                });
+                        closeCategoryModal();
+                        await renderCategories();
+                    } catch (error) {
+                        console.error('Erro ao salvar categoria:', error);
+                        alert('Erro ao salvar categoria: ' + (error.message || error));
+                    }
+                });
 
-                                window.editCategory = async (id) => {
-                                    try {
-                                        const categories = await db.getCategories();
-                                        const category = categories.find(c => c.id === id);
-                                        if (!category) return;
+                window.editCategory = async (id) => {
+                    try {
+                        const categories = await db.getCategories();
+                        const category = categories.find(c => c.id === id);
+                        if (!category) return;
 
-                                        document.getElementById('category-id').value = category.id;
-                                        document.getElementById('category-name').value = category.name;
-                                        document.getElementById('category-slug').value = category.slug;
+                        document.getElementById('category-id').value = category.id;
+                        document.getElementById('category-name').value = category.name;
+                        document.getElementById('category-slug').value = category.slug;
 
-                                        openCategoryModal(id);
+                        openCategoryModal(id);
 
-                                        // Pre-fill Image
-                                        if (category.image) {
-                                            if (category.image.startsWith('http') && !category.image.startsWith('data:')) {
-                                                document.querySelector('input[name="cat-upload-type"][value="url"]').checked = true;
-                                                document.getElementById('category-url').value = category.image;
-                                                toggleCatUploadType();
-                                            } else {
-                                                document.querySelector('input[name="cat-upload-type"][value="file"]').checked = true;
-                                                document.getElementById('category-image-base64').value = category.image;
-                                                toggleCatUploadType();
-                                            }
-                                        } else {
-                                            document.querySelector('input[name="cat-upload-type"][value="file"]').checked = true;
-                                            document.getElementById('category-image').value = '';
-                                            document.getElementById('category-image-base64').value = '';
-                                            document.getElementById('category-url').value = '';
-                                            toggleCatUploadType();
-                                        }
+                        // Pre-fill Image
+                        if (category.image) {
+                            if (category.image.startsWith('http') && !category.image.startsWith('data:')) {
+                                document.querySelector('input[name="cat-upload-type"][value="url"]').checked = true;
+                                document.getElementById('category-url').value = category.image;
+                                toggleCatUploadType();
+                            } else {
+                                document.querySelector('input[name="cat-upload-type"][value="file"]').checked = true;
+                                document.getElementById('category-image-base64').value = category.image;
+                                toggleCatUploadType();
+                            }
+                        } else {
+                            document.querySelector('input[name="cat-upload-type"][value="file"]').checked = true;
+                            document.getElementById('category-image').value = '';
+                            document.getElementById('category-image-base64').value = '';
+                            document.getElementById('category-url').value = '';
+                            toggleCatUploadType();
+                        }
 
-                                        // Pre-fill subcategories
-                                        const subcategoriesContainer = document.getElementById('subcategories-container');
-                                        subcategoriesContainer.innerHTML = '';
-                                        if (category.subcategories && category.subcategories.length > 0) {
-                                            category.subcategories.forEach(sub => addSubcategoryField(sub.name, sub.slug, sub.id));
-                                        }
+                        // Pre-fill subcategories
+                        const subcategoriesContainer = document.getElementById('subcategories-container');
+                        subcategoriesContainer.innerHTML = '';
+                        if (category.subcategories && category.subcategories.length > 0) {
+                            category.subcategories.forEach(sub => addSubcategoryField(sub.name, sub.slug, sub.id));
+                        }
 
-                                    } catch (error) {
-                                        console.error('Erro ao carregar categoria para edição:', error);
-                                        alert('Erro ao carregar categoria para edição.');
-                                    }
-                                };
+                    } catch (error) {
+                        console.error('Erro ao carregar categoria para edição:', error);
+                        alert('Erro ao carregar categoria para edição.');
+                    }
+                };
 
-                                window.deleteCategory = async (id) => {
-                                    if (confirm('Tem certeza que deseja excluir esta categoria?')) {
-                                        try {
-                                            await db.deleteCategory(id);
-                                            await renderCategories();
-                                        } catch (error) {
-                                            console.error('Erro ao excluir:', error);
-                                            alert('Erro ao excluir categoria.');
-                                        }
-                                    }
-                                };
+                window.deleteCategory = async (id) => {
+                    if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+                        try {
+                            await db.deleteCategory(id);
+                            await renderCategories();
+                        } catch (error) {
+                            console.error('Erro ao excluir:', error);
+                            alert('Erro ao excluir categoria.');
+                        }
+                    }
+                };
 
-                                // Initialize
-                                document.addEventListener('DOMContentLoaded', renderCategories);
+                // Initialize
+                document.addEventListener('DOMContentLoaded', renderCategories);
             </script>
 </body>
 
