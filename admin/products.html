@@ -207,10 +207,19 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Categoria</label>
-                        <select id="product-category" class="form-control" required>
+                        <select id="product-category" class="form-control" required onchange="populateSubcategories()">
                             <!-- Populated by JS -->
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Subcategoria</label>
+                        <select id="product-subcategory" class="form-control">
+                            <option value="">Selecione primeiro a categoria</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Peso (kg)</label>
                         <input type="number" id="product-weight" class="form-control" step="0.001" placeholder="0.300">
@@ -221,6 +230,7 @@
                     <label class="form-label">Tipo de Tamanho</label>
                     <select id="product-size-type" class="form-control" onchange="renderSizeOptions(this.value)">
                         <option value="clothing">Roupas (P, M, G...)</option>
+                        <option value="numeric">Numérico (38-50)</option>
                         <option value="sneakers">Tênis (34, 35, 36...)</option>
                         <option value="unique">Tamanho Único</option>
                     </select>
@@ -370,11 +380,15 @@
         const sizeGuideTableContainer = document.getElementById('size-guide-table-container');
 
         // Functions
-        function openProductModal(id = null) {
+        async function openProductModal(id = null) {
             modal.style.display = 'flex';
+
+            // 1. Populate Categories first (Sequential)
+            await populateCategories();
+
             if (id) {
                 document.getElementById('modal-title').innerText = 'Editar Produto';
-                loadProductData(id);
+                await loadProductData(id);
             } else {
                 document.getElementById('modal-title').innerText = 'Novo Produto';
                 form.reset();
@@ -386,13 +400,13 @@
                 renderVideoPreview();
                 renderColors();
                 renderSizeOptions('clothing'); // Default
+                populateSubcategories(); // Reset subcategories
 
                 // Reset Size Guide
                 sizeGuideCheckbox.checked = false;
                 sizeGuideContainer.style.display = 'none';
                 sizeGuideTableContainer.innerHTML = '';
             }
-            populateCategories();
         }
 
         function closeProductModal() {
@@ -492,6 +506,13 @@
                 currentVideo = product.video;
                 currentColors = product.colors || [];
 
+                // Set Category & Subcategory
+                const catSelect = document.getElementById('product-category');
+                catSelect.value = product.category_id || '';
+
+                // Trigger Subcategory population
+                populateSubcategories(product.subcategory_id);
+
                 renderImagePreview();
                 renderVideoPreview();
                 renderColors();
@@ -569,6 +590,8 @@
                 options = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
             } else if (type === 'sneakers') {
                 for (let i = 34; i <= 44; i++) options.push(i.toString());
+            } else if (type === 'numeric') {
+                for (let i = 38; i <= 50; i += 2) options.push(i.toString());
             } else {
                 options = ['Único'];
             }
@@ -807,6 +830,7 @@
                 price: parseFloat(document.getElementById('product-price').value.replace(',', '.')),
                 old_price: document.getElementById('product-old-price').value ? parseFloat(document.getElementById('product-old-price').value.replace(',', '.')) : null,
                 category_id: document.getElementById('product-category').value || null,
+                subcategory_id: document.getElementById('product-subcategory').value || null,
                 weight: document.getElementById('product-weight').value ? parseFloat(document.getElementById('product-weight').value) : 0,
                 active: document.getElementById('product-active').checked,
                 is_featured: document.getElementById('product-featured').checked,
