@@ -17,6 +17,12 @@
         </button>
         <div class="overlay" id="mobile-overlay"></div>
 
+        <!-- DEBUG BAR (Temporary) -->
+        <div id="debug-bar"
+            style="background: #ffebee; color: #c62828; padding: 10px; text-align: center; font-weight: bold; border-bottom: 1px solid #ffcdd2;">
+            <i class="fas fa-bug"></i> Debug Iniciando...
+        </div>
+
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -86,10 +92,50 @@
     <script src="../assets/js/db.js"></script>
     <script src="../assets/js/main.js"></script>
     <script>
+        // Debug Logic
+        async function runDebug() {
+            const el = document.getElementById('debug-bar');
+            try {
+                // 1. Check Session
+                const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    el.innerHTML = 'Status: Não logado (Session Null)';
+                    return;
+                }
+
+                // 2. Check Profile
+                const user = session.user;
+                const { data: profile, error: profileError } = await window.supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError) {
+                    el.innerHTML = `Logado: ${user.email} <br> Erro Profile: ${profileError.message} (Provável RLS)`;
+                    return;
+                }
+
+                if (profile) {
+                    el.innerHTML = `USER: ${user.email} | ID: ${user.id.slice(0, 5)}... | ROLE: <strong>${profile.role || 'NULO'}</strong>`;
+                    if (profile.role !== 'admin') {
+                        el.innerHTML += ' <br> (⚠️ VOCÊ NÃO É ADMIN! Rode o SQL para corrigir)';
+                    }
+                } else {
+                    el.innerHTML = `Logado: ${user.email} <br> Profile não encontrado (Tabela vazia?)`;
+                }
+
+            } catch (err) {
+                el.innerHTML = `Erro JS: ${err.message}`;
+            }
+        }
+
         // Mobile Toggle Logic
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobile-overlay');
+
+        document.addEventListener('DOMContentLoaded', runDebug);
 
         if (mobileBtn) {
             mobileBtn.addEventListener('click', () => {
