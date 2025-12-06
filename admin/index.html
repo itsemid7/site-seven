@@ -17,12 +17,6 @@
         </button>
         <div class="overlay" id="mobile-overlay"></div>
 
-        <!-- DEBUG BAR -->
-        <div id="debug-bar"
-            style="background: #ffebee; color: #c62828; padding: 10px; text-align: center; font-weight: bold; border-bottom: 1px solid #ffcdd2;">
-            <i class="fas fa-bug"></i> Debug Iniciando...
-        </div>
-
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -130,72 +124,6 @@
     <script src="../assets/js/main.js"></script>
 
     <script>
-        // Debug Logic (Safe Mode)
-        async function runDebug() {
-            const el = document.getElementById('debug-bar');
-            if (!el) return;
-
-            el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
-
-            try {
-                // Wait for Supabase to be ready from supabase-init.js
-                // If it fails there, we catch it here.
-                if (!window.supabaseClient) {
-                    // Try Emergency Direct Init
-                    const SB_URL = 'https://bwpskigahszxkgzxtewf.supabase.co';
-                    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cHNraWdhaHN6eGtnenh0ZXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3MDQzMDgsImV4cCI6MjA4MDI4MDMwOH0.D99euPduBI0kJuE0u3Yw4fJCsvT5LSyO4VTbtbY3TD0';
-                    if (typeof supabase !== 'undefined') {
-                        window.supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-                    } else {
-                        throw new Error("Supabase JS Library not found");
-                    }
-                }
-
-                const client = window.supabaseClient;
-
-                // 1. Check Session
-                const { data: { session }, error: sessionError } = await client.auth.getSession();
-
-                if (sessionError) throw sessionError;
-
-                if (!session) {
-                    el.innerHTML = 'Status: <strong>NÃO LOGADO</strong>. Faça login novamente.';
-                    return;
-                }
-
-                const user = session.user;
-
-                // 2. Check Profile
-                const { data: profile, error: profileError } = await client
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profileError && profileError.code !== 'PGRST116') {
-                    el.innerHTML = `LOGADO: ${user.email} | Erro Profile: ${profileError.message}`;
-                    return;
-                }
-
-                const role = profile ? profile.role : 'NENHUM (Sem Perfil)';
-
-                el.innerHTML = `✅ CONECTADO | Email: ${user.email} | Role: <strong>${role}</strong>`;
-
-                if (role !== 'admin') {
-                    el.style.backgroundColor = '#ffcdd2';
-                    el.innerHTML += ' <br> 🛑 <strong>NÃO É ADMIN!</strong> (Dados ocultos)';
-                } else {
-                    el.style.backgroundColor = '#c8e6c9';
-                    el.style.color = '#2e7d32';
-                    el.innerHTML += ' <br> ✨ Acesso OK!';
-                }
-
-            } catch (err) {
-                console.error(err);
-                el.innerHTML = `ERRO DEBUG: ${err.message}`;
-            }
-        }
-
         // Dashboard Stats
         async function loadDashboard() {
             try {
@@ -257,7 +185,6 @@
 
         // Init
         window.addEventListener('DOMContentLoaded', () => {
-            runDebug();
             loadDashboard();
         });
 
