@@ -281,13 +281,7 @@ class AuthService {
 
         if (error) return { error: error.message };
 
-        // Create profile in 'profiles' table if needed (trigger usually handles this, or we do it manually)
-        // Schema has profiles table.
-        // Let's assume we might need to insert into profiles manually if no trigger.
-        // But for now, let's rely on auth metadata or insert if we can.
         if (authData.user) {
-            // Wait a bit for trigger if exists, or just insert
-            // Using upsert is safer
             const { error: profileError } = await this.client
                 .from('profiles')
                 .upsert([{
@@ -298,7 +292,6 @@ class AuthService {
 
             if (profileError) {
                 console.error('Error creating profile:', profileError);
-                // Don't fail the whole registration if profile fails, but log it
             }
         }
 
@@ -335,6 +328,89 @@ class AuthService {
             .update(data)
             .eq('id', user.id);
 
+        if (error) return { error: error.message };
+        return { success: true };
+    }
+
+    // --- MFA Methods (2FA) ---
+
+    // 1. Enroll (Start Setup)
+    async enrollMFA() {
+        if (!this.client) return { error: 'Supabase not initialized' };
+
+        try {
+            const { data, error } = await this.client.auth.mfa.enroll({
+                factorType: 'totp'
+            });
+
+            if (error) return { error: error.message };
+
+            // Correct Supabase structure: data.totp contains details
+            const totp = data.totp || data;
+
+            return {
+                id: data.id,
+                secret: totp.secret,
+                qr_code: totp.qr_code
+            };
+        } catch (err) {
+            console.error('MFA Enroll Error:', err);
+            return { error: 'Erro ao iniciar configuração 2FA' };
+        }
+    }
+
+    // 2. Challenge
+    async challengeMFA(factorId) {
+        if (!this.client) return { error: 'Supabase not initialized' };
+
+        const { data, error } = await this.client.auth.mfa.challenge({ factorId });
+        if (error) return { error: error.message };
+
+        return { id: data.id, expires_at: data.expires_at };
+    }
+
+    // 3. Verify
+    async verifyMFA(factorId, challengeId, code) {
+        if (!this.client) return { error: 'Supabase not initialized' };
+
+        const { data, error } = await this.client.auth.mfa.verify({
+            factorId,
+            challengeId,
+            code
+        });
+
+        if (error) return { error: error.message };
+        return { success: true, data };
+    }
+
+    // 4. Helper: Challenge + Verify
+    async challengeAndVerifyMFA(factorId, code) {
+        const challengeRes = await this.challengeMFA(factorId);
+        if (challengeRes.error) return challengeRes;
+
+        return await this.verifyMFA(factorId, challengeRes.id, code);
+    }
+
+    // 5. Get Assurance Level
+    async getAssuranceLevel() {
+        if (!this.client) return null;
+        const { data, error } = await this.client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (error) return null;
+        return data;
+    }
+
+    // 6. List Factors
+    async listFactors() {
+        if (!this.client) return [];
+        const { data, error } = await this.client.auth.mfa.listFactors();
+        if (error) return [];
+        return data.totp || [];
+    }
+
+    // 7. Unenroll
+    async unenrollMFA(factorId) {
+        if (!this.client) return { error: 'Supabase not initialized' };
+        const { data, error } = await this.client.auth.mfa.unenroll({ factorId });
         if (error) return { error: error.message };
         return { success: true };
     }

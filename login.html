@@ -221,6 +221,20 @@
         </div>
     </div>
 
+    <!-- MFA Challenge Modal -->
+    <div id="mfa-challenge-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px; text-align: center;">Segurança em 2 Etapas</h3>
+            <p style="margin-bottom: 20px; text-align: center;">Digite o código do aplicativo autenticador.</p>
+            <div class="form-group">
+                <input type="text" id="mfa-challenge-code" placeholder="000000" maxlength="6"
+                    style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
+            </div>
+            <div class="error-msg" id="mfa-challenge-error"></div>
+            <button onclick="submitMFAChallenge()" class="auth-btn">Verificar</button>
+        </div>
+    </div>
+
     <!-- Password Recovery Modal -->
     <div id="recovery-modal" class="modal">
         <div class="modal-content">
@@ -249,6 +263,51 @@
     <script src="assets/js/nav.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
+        let pendingMFAFactorId = null;
+
+        // Helper: Redirect based on role
+        async function redirectUser(userId) {
+            try {
+                const { data: profile, error } = await window.supabaseClient
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', userId)
+                    .single();
+
+                if (profile && (profile.role === 'admin' || profile.role === 'staff')) {
+                    window.location.href = 'admin/users.html';
+                } else {
+                    window.location.href = 'checkout.html';
+                }
+            } catch (err) {
+                console.error('Error redirecting:', err);
+                window.location.href = 'checkout.html';
+            }
+        }
+
+        async function submitMFAChallenge() {
+            const code = document.getElementById('mfa-challenge-code').value;
+            const errorDiv = document.getElementById('mfa-challenge-error');
+
+            if (!code || code.length !== 6) {
+                errorDiv.textContent = 'Digite o código de 6 dígitos.';
+                return;
+            }
+
+            errorDiv.textContent = 'Verificando...';
+
+            const result = await authService.challengeAndVerifyMFA(pendingMFAFactorId, code);
+
+            if (result.success) {
+                // Success! Redirect.
+                errorDiv.textContent = '';
+                const user = await authService.getCurrentUser();
+                redirectUser(user.id);
+            } else {
+                errorDiv.textContent = 'Código inválido ou expirado.';
+            }
+        }
+
         // Tab Switching
         function switchTab(tab, event) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -279,33 +338,34 @@
         }
 
         // Login Logic
+        // Login Logic
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
+            const err = document.getElementById('login-error');
 
             const result = await authService.login(email, pass);
 
             if (result.user) {
-                // Check role to redirect admins
-                try {
-                    const { data: profile } = await db.client
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', result.user.id)
-                        .single();
+                // Check if MFA is required
+                const assurance = await authService.getAssuranceLevel();
 
-                    if (profile && (profile.role === 'admin' || profile.role === 'staff')) {
-                        window.location.href = 'admin/users.html';
-                    } else {
-                        window.location.href = 'checkout.html';
+                if (assurance && assurance.nextLevel === 'aal2' && assurance.currentLevel === 'aal1') {
+                    const factors = await authService.listFactors();
+                    if (factors.length > 0) {
+                        // MFA Required
+                        pendingMFAFactorId = factors[0].id; // Use first TOTP factor
+                        document.getElementById('mfa-challenge-modal').style.display = 'flex';
+                        document.getElementById('mfa-challenge-code').focus();
+                        return; // Stop redirection, wait for MFA
                     }
-                } catch (err) {
-                    console.error('Error checking role:', err);
-                    window.location.href = 'checkout.html';
                 }
+
+                // Call redirect if no MFA needed
+                redirectUser(result.user.id);
+
             } else {
-                const err = document.getElementById('login-error');
                 err.textContent = result.error || 'Erro ao fazer login';
                 err.style.display = 'block';
             }

@@ -32,6 +32,7 @@
                 <li><a href="users.html"><i class="fas fa-users"></i> Usuários</a></li>
                 <li><a href="freight.html"><i class="fas fa-truck"></i> Frete</a></li>
                 <li><a href="banners.html"><i class="fas fa-images"></i> Banners</a></li>
+                <li><a href="#" onclick="openSecurityModal()"><i class="fas fa-shield-alt"></i> Segurança / 2FA</a></li>
                 <li><a href="../index.html" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Loja</a></li>
             </ul>
             <div class="sidebar-footer">
@@ -138,10 +139,46 @@
             </div>
 
             <!-- Scripts -->
+            <!-- Security Modal (2FA) -->
+            <div id="security-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="closeSecurityModal()">&times;</span>
+                    <h3 style="margin-bottom: 20px;">Configurar 2FA</h3>
+
+                    <div id="mfa-step-1">
+                        <p>Escaneie o QR Code abaixo com seu aplicativo (Google Authenticator).</p>
+                        <div id="mfa-qr" style="margin: 20px 0; text-align: center;">Loading...</div>
+                        <div class="form-group">
+                            <label>Código de Verificação (6 dígitos)</label>
+                            <input type="text" id="mfa-verify-code" placeholder="123456" maxlength="6">
+                        </div>
+                        <button onclick="enableMFA()" class="btn-primary" style="width: 100%;">Ativar 2FA</button>
+                    </div>
+
+                    <div id="mfa-step-success" style="display: none; text-align: center;">
+                        <i class="fas fa-check-circle" style="color: green; font-size: 3rem; margin-bottom: 15px;"></i>
+                        <h4>2FA Ativado com Sucesso!</h4>
+                        <p>Agora seus logins pedirão esse código.</p>
+                        <button onclick="closeSecurityModal()" class="admin-btn-secondary"
+                            style="margin-top: 15px;">Fechar</button>
+                    </div>
+
+                    <div id="mfa-active-msg" style="display: none; text-align: center; padding: 20px;">
+                        <i class="fas fa-shield-alt" style="color: green; font-size: 3rem; margin-bottom: 15px;"></i>
+                        <h4>Você já está protegido!</h4>
+                        <p>A Autenticação de Dois Fatores está ativa nesta conta.</p>
+                    </div>
+
+                    <div class="error-msg" id="mfa-error" style="display: none; margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- Scripts -->
             <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
             <script src="../assets/js/supabase-init.js"></script>
             <script src="../assets/js/db.js"></script>
             <script src="../assets/js/api.js"></script>
+            <script src="../assets/js/admin.js"></script>
             <script src="../assets/js/main.js"></script>
             <script>
                 // Mobile Toggle Logic
@@ -340,126 +377,126 @@
             <script src="../assets/js/main.js"></script>
             <script>
                                 // Mobile Toggle Logic
-                                            const mobileBtn = document.getElementById('mobile-menu-btn');
-                                            const sidebar = document.getElementById('sidebar');
-                                            const overlay = document.getElementById('mobile-overlay');
+                            const mobileBtn = document.getElementById('mobile-menu-btn');
+                            const sidebar = document.getElementById('sidebar');
+                            const overlay = document.getElementById('mobile-overlay');
 
-                                            if (mobileBtn) {
-                                                mobileBtn.addEventListener('click', () => {
-                                                    sidebar.classList.toggle('active');
-                                                    overlay.classList.toggle('active');
-                                                });
+                            if (mobileBtn) {
+                                mobileBtn.addEventListener('click', () => {
+                                    sidebar.classList.toggle('active');
+                                    overlay.classList.toggle('active');
+                                });
                                 }
 
-                                            if (overlay) {
-                                                overlay.addEventListener('click', () => {
-                                                    sidebar.classList.remove('active');
-                                                    overlay.classList.remove('active');
-                                                });
+                            if (overlay) {
+                                overlay.addEventListener('click', () => {
+                                    sidebar.classList.remove('active');
+                                    overlay.classList.remove('active');
+                                });
                                 }
 
-                                            // Category Management Logic
-                                            async function renderCategories() {
+                            // Category Management Logic
+                            async function renderCategories() {
                                     const tbody = document.getElementById('categories-list');
-                                            try {
+                            try {
                                         const categories = await db.getCategories();
 
-                                            if (!categories || categories.length === 0) {
-                                                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma categoria cadastrada.</td></tr>';
-                                            return;
+                            if (!categories || categories.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma categoria cadastrada.</td></tr>';
+                            return;
                                         }
 
                                         tbody.innerHTML = categories.map(c => `
-                                            <tr>
-                                                <td>
-                                                    ${c.image ? `<img src="${c.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` : '<span style="color:#ccc;">Sem img</span>'}
-                                                </td>
-                                                <td>${c.name}</td>
-                                                <td>${c.slug}</td>
-                                                <td>${c.subcategories ? c.subcategories.length : 0} subcategorias</td>
-                                                <td>
-                                                    <button class="action-btn" onclick="editCategory(${c.id})"><i class="fas fa-edit"></i></button>
-                                                    <button class="action-btn delete" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button>
-                                                </td>
-                                            </tr>
-                                            `).join('');
+                            <tr>
+                                <td>
+                                    ${c.image ? `<img src="${c.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` : '<span style="color:#ccc;">Sem img</span>'}
+                                </td>
+                                <td>${c.name}</td>
+                                <td>${c.slug}</td>
+                                <td>${c.subcategories ? c.subcategories.length : 0} subcategorias</td>
+                                <td>
+                                    <button class="action-btn" onclick="editCategory(${c.id})"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            `).join('');
                                     } catch (error) {
-                                                console.error('Erro ao renderizar categorias:', error);
-                                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar categorias.</td></tr>';
+                                console.error('Erro ao renderizar categorias:', error);
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar categorias.</td></tr>';
                                     }
                                 }
 
-                                            // Modal Functions
-                                            const modal = document.getElementById('category-modal');
-                                            const form = document.getElementById('category-form');
+                            // Modal Functions
+                            const modal = document.getElementById('category-modal');
+                            const form = document.getElementById('category-form');
 
-                                            function openCategoryModal(categoryId = null) {
-                                                modal.style.display = 'flex';
-                                            const container = document.getElementById('subcategories-container');
-                                            container.innerHTML = '';
+                            function openCategoryModal(categoryId = null) {
+                                modal.style.display = 'flex';
+                            const container = document.getElementById('subcategories-container');
+                            container.innerHTML = '';
 
-                                            // Reset Image Inputs
-                                            document.getElementById('category-image').value = '';
-                                            document.getElementById('category-image-base64').value = '';
-                                            document.getElementById('category-url').value = '';
-                                            toggleCatUploadType();
+                            // Reset Image Inputs
+                            document.getElementById('category-image').value = '';
+                            document.getElementById('category-image-base64').value = '';
+                            document.getElementById('category-url').value = '';
+                            toggleCatUploadType();
 
-                                            if (categoryId) {
-                                                // Edit mode
-                                                document.getElementById('modal-title').textContent = 'Editar Categoria';
+                            if (categoryId) {
+                                // Edit mode
+                                document.getElementById('modal-title').textContent = 'Editar Categoria';
                                         // Load data logic handled in editCategory
                                     } else {
-                                                // Add mode
-                                                document.getElementById('modal-title').textContent = 'Nova Categoria';
-                                            form.reset();
-                                            document.getElementById('category-id').value = '';
+                                // Add mode
+                                document.getElementById('modal-title').textContent = 'Nova Categoria';
+                            form.reset();
+                            document.getElementById('category-id').value = '';
                                     }
                                 }
 
-                                            function closeCategoryModal() {
-                                                modal.style.display = 'none';
+                            function closeCategoryModal() {
+                                modal.style.display = 'none';
                                 }
 
-                                            function toggleCatUploadType() {
+                            function toggleCatUploadType() {
                                     const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
-                                            const fileInput = document.getElementById('cat-file-input');
-                                            const urlInput = document.getElementById('cat-url-input');
+                            const fileInput = document.getElementById('cat-file-input');
+                            const urlInput = document.getElementById('cat-url-input');
 
-                                            if (type === 'file') {
-                                                fileInput.style.display = 'block';
-                                            urlInput.style.display = 'none';
+                            if (type === 'file') {
+                                fileInput.style.display = 'block';
+                            urlInput.style.display = 'none';
                                     } else {
-                                                fileInput.style.display = 'none';
-                                            urlInput.style.display = 'block';
+                                fileInput.style.display = 'none';
+                            urlInput.style.display = 'block';
                                     }
                                 }
 
-                                            // Image Processing
-                                            document.getElementById('category-image').addEventListener('change', function (e) {
+                            // Image Processing
+                            document.getElementById('category-image').addEventListener('change', function (e) {
                                     const file = e.target.files[0];
-                                            if (file) {
+                            if (file) {
                                         const reader = new FileReader();
-                                            reader.onload = function (e) {
-                                                document.getElementById('category-image-base64').value = e.target.result;
+                            reader.onload = function (e) {
+                                document.getElementById('category-image-base64').value = e.target.result;
                                         };
-                                            reader.readAsDataURL(file);
+                            reader.readAsDataURL(file);
                                     }
                                 });
 
-                                            // Subcategory Logic
-                                            function addSubcategoryField(name = '', slug = '', id = null) {
+                            // Subcategory Logic
+                            function addSubcategoryField(name = '', slug = '', id = null) {
                                     const container = document.getElementById('subcategories-container');
-                                            const div = document.createElement('div');
-                                            div.className = 'subcategory-item';
-                                            div.style.display = 'flex';
-                                            div.style.gap = '10px';
-                                            div.style.marginBottom = '10px';
+                            const div = document.createElement('div');
+                            div.className = 'subcategory-item';
+                            div.style.display = 'flex';
+                            div.style.gap = '10px';
+                            div.style.marginBottom = '10px';
 
-                                            div.innerHTML = `
-                                            <input type="hidden" class="sub-id" value="${id || ''}">
-                                                <input type="text" class="form-control sub-name" placeholder="Nome" value="${name}" required style="flex: 1;">
-                                                    <input type="text" class="form-control sub-slug" placeholder="Slug (Auto)" value="${slug}" readonly style="background: #eee; flex: 1;">
-                                                        <button type="button" class="btn-primary" style="background: #dc3545; padding: 0 15px;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                            div.innerHTML = `
+                            <input type="hidden" class="sub-id" value="${id || ''}">
+                                <input type="text" class="form-control sub-name" placeholder="Nome" value="${name}" required style="flex: 1;">
+                                    <input type="text" class="form-control sub-slug" placeholder="Slug (Auto)" value="${slug}" readonly style="background: #eee; flex: 1;">
+                                        <button type="button" class="btn-primary" style="background: #dc3545; padding: 0 15px;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
             `;
 
                                     // Auto-generate slug for subcategory
