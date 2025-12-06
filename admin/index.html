@@ -138,17 +138,94 @@
         document.addEventListener('DOMContentLoaded', runDebug);
 
         if (mobileBtn) {
-            mobileBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
+            <script>
+        // Debug Logic - Hardcoded Init for Safety
+                async function runDebug() {
+            const el = document.getElementById('debug-bar');
+                if(!el) return;
+
+                el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tentando conectar ao Supabase...';
+
+                try {
+                // Direct initialization to bypass any loading issues
+                const SB_URL = 'https://bwpskigahszxkgzxtewf.supabase.co';
+                const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cHNraWdhaHN6eGtnenh0ZXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3MDQzMDgsImV4cCI6MjA4MDI4MDMwOH0.D99euPduBI0kJuE0u3Yw4fJCsvT5LSyO4VTbtbY3TD0';
+
+                if (typeof supabase === 'undefined') {
+                    el.innerHTML = 'ERRO CRÍTICO: Biblioteca Supabase não carregou (CDN block?)';
+                return;
+                }
+
+                const client = supabase.createClient(SB_URL, SB_KEY);
+
+                // 1. Check Session
+                const {data: {session}, error: sessionError } = await client.auth.getSession();
+
+                if (sessionError) {
+                    el.innerHTML = `Erro Sessão: ${sessionError.message}`;
+                return;
+                }
+
+                if (!session) {
+                    el.innerHTML = 'Status: <strong>NÃO LOGADO</strong>. Faça login novamente.';
+                return;
+                }
+
+                const user = session.user;
+
+                // 2. Check Profile directly
+                const {data: profile, error: profileError } = await client
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+                if (profileError) {
+                    console.error("Profile Error:", profileError);
+                if (profileError.code === 'PGRST116') {
+                    el.innerHTML = `LOGADO: ${user.email} <br> ⚠️ PERFIL NÃO EXISTE NA TABELA 'PROFILES'.`;
+                    } else {
+                    el.innerHTML = `LOGADO: ${user.email} <br> ❌ ERRO AO LER PERFIL: ${profileError.message} (RLS?)`;
+                    }
+                return;
+                }
+
+                el.innerHTML = `✅ CONECTADO | Email: ${user.email} | Role: <strong>${profile.role}</strong>`;
+
+                if (profile.role !== 'admin') {
+                    el.style.backgroundColor = '#ffcdd2'; // Red warning
+                el.innerHTML += ' <br> 🛑 <strong>VOCÊ NÃO É ADMIN!</strong> (Isso explica os dados sumidos)';
+                } else {
+                        el.style.backgroundColor = '#c8e6c9'; // Green success
+                    el.style.color = '#2e7d32';
+                    el.innerHTML += ' <br> ✨ Permissões de Admin OK!';
+                }
+
+            } catch (err) {
+                            console.error("Debug Error:", err);
+                        el.innerHTML = `CRASH NO JAVASCRIPT: ${err.message}`;
+            }
         }
 
-        if (overlay) {
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
+                        // Mobile Toggle Logic
+                        const mobileBtn = document.getElementById('mobile-menu-btn');
+                        const sidebar = document.getElementById('sidebar');
+                        const overlay = document.getElementById('mobile-overlay');
+
+                        window.onload = runDebug;
+
+                        if (mobileBtn) {
+                            mobileBtn.addEventListener('click', () => {
+                                sidebar.classList.toggle('active');
+                                overlay.classList.toggle('active');
+                            });
+        }
+
+                        if (overlay) {
+                            overlay.addEventListener('click', () => {
+                                sidebar.classList.remove('active');
+                                overlay.classList.remove('active');
+                            });
         }
 
         // Dashboard Logic
@@ -156,15 +233,15 @@
             try {
                 // Fetch data in parallel
                 const [products, users, orders] = await Promise.all([
-                    db.getProducts(),
-                    db.getUsers(),
-                    db.getOrders()
-                ]);
+                        db.getProducts(),
+                        db.getUsers(),
+                        db.getOrders()
+                        ]);
 
-                // Update Counts
-                document.getElementById('total-products').textContent = products ? products.length : 0;
-                document.getElementById('total-users').textContent = users ? users.length : 0;
-                document.getElementById('total-orders').textContent = orders ? orders.length : 0;
+                        // Update Counts
+                        document.getElementById('total-products').textContent = products ? products.length : 0;
+                        document.getElementById('total-users').textContent = users ? users.length : 0;
+                        document.getElementById('total-orders').textContent = orders ? orders.length : 0;
 
                 // Calculate Sales Today
                 if (orders && orders.length > 0) {
@@ -178,7 +255,7 @@
                         return sum + (parseFloat(order.total) || 0);
                     }, 0);
 
-                    document.getElementById('today-sales').textContent = `R$ ${totalSales.toFixed(2).replace('.', ',')}`;
+                        document.getElementById('today-sales').textContent = `R$ ${totalSales.toFixed(2).replace('.', ',')}`;
                 } else {
                     document.getElementById('today-sales').textContent = 'R$ 0,00';
                 }
@@ -242,73 +319,73 @@
     <script>
         // MFA Logic specific for Admin Dashboard
 
-            // Define global for factorId
-            window.mfaFactorId = null;
+                    // Define global for factorId
+                    window.mfaFactorId = null;
 
-            async function openSecurityModal() {
+                    async function openSecurityModal() {
             const modal = document.getElementById('security-modal');
-            const step1 = document.getElementById('mfa-step-1');
-            const stepSuccess = document.getElementById('mfa-step-success');
-            const activeMsg = document.getElementById('mfa-active-msg');
-            const qrContainer = document.getElementById('mfa-qr');
+                    const step1 = document.getElementById('mfa-step-1');
+                    const stepSuccess = document.getElementById('mfa-step-success');
+                    const activeMsg = document.getElementById('mfa-active-msg');
+                    const qrContainer = document.getElementById('mfa-qr');
 
-            modal.style.display = 'flex';
+                    modal.style.display = 'flex';
 
-            // Instantiate api.js AuthService
-            const auth = new AuthService();
-            const enrolledFactors = await auth.listFactors();
+                    // Instantiate api.js AuthService
+                    const auth = new AuthService();
+                    const enrolledFactors = await auth.listFactors();
             
             if (enrolledFactors.length > 0) {
-                step1.style.display = 'none';
-            stepSuccess.style.display = 'none';
-            activeMsg.style.display = 'block';
-            return;
+                        step1.style.display = 'none';
+                    stepSuccess.style.display = 'none';
+                    activeMsg.style.display = 'block';
+                    return;
             }
 
-            // Not enrolled, start enrollment
-            step1.style.display = 'block';
-            stepSuccess.style.display = 'none';
-            activeMsg.style.display = 'none';
-            qrContainer.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando QR Code...';
+                    // Not enrolled, start enrollment
+                    step1.style.display = 'block';
+                    stepSuccess.style.display = 'none';
+                    activeMsg.style.display = 'none';
+                    qrContainer.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando QR Code...';
 
-            const enrollRes = await auth.enrollMFA();
+                    const enrollRes = await auth.enrollMFA();
 
-            if (enrollRes.error) {
-                document.getElementById('mfa-error').textContent = enrollRes.error;
-            document.getElementById('mfa-error').style.display = 'block';
-            return;
+                    if (enrollRes.error) {
+                        document.getElementById('mfa-error').textContent = enrollRes.error;
+                    document.getElementById('mfa-error').style.display = 'block';
+                    return;
             }
 
-            window.mfaFactorId = enrollRes.id;
-            qrContainer.innerHTML = enrollRes.qr_code;
+                    window.mfaFactorId = enrollRes.id;
+                    qrContainer.innerHTML = enrollRes.qr_code;
         }
 
-            function closeSecurityModal() {
-                document.getElementById('security-modal').style.display = 'none';
-            document.getElementById('mfa-error').style.display = 'none';
-            document.getElementById('mfa-verify-code').value = '';
+                    function closeSecurityModal() {
+                        document.getElementById('security-modal').style.display = 'none';
+                    document.getElementById('mfa-error').style.display = 'none';
+                    document.getElementById('mfa-verify-code').value = '';
         }
 
-            async function enableMFA() {
+                    async function enableMFA() {
             const code = document.getElementById('mfa-verify-code').value;
-            const errorEl = document.getElementById('mfa-error');
+                    const errorEl = document.getElementById('mfa-error');
 
-            if (code.length !== 6) {
-                errorEl.textContent = 'Digite 6 dígitos';
-            errorEl.style.display = 'block';
-            return;
+                    if (code.length !== 6) {
+                        errorEl.textContent = 'Digite 6 dígitos';
+                    errorEl.style.display = 'block';
+                    return;
             }
 
-            const auth = new AuthService();
-            const verifyRes = await auth.challengeAndVerifyMFA(window.mfaFactorId, code);
+                    const auth = new AuthService();
+                    const verifyRes = await auth.challengeAndVerifyMFA(window.mfaFactorId, code);
 
-            if (verifyRes.error) {
-                errorEl.textContent = 'Código inválido ou expirado.';
-            errorEl.style.display = 'block';
+                    if (verifyRes.error) {
+                        errorEl.textContent = 'Código inválido ou expirado.';
+                    errorEl.style.display = 'block';
             } else {
-                document.getElementById('mfa-step-1').style.display = 'none';
-            document.getElementById('mfa-step-success').style.display = 'block';
-            errorEl.style.display = 'none';
+                        document.getElementById('mfa-step-1').style.display = 'none';
+                    document.getElementById('mfa-step-success').style.display = 'block';
+                    errorEl.style.display = 'none';
             }
         }
     </script>
