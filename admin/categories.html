@@ -224,7 +224,7 @@
                             <button class="action-btn delete" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
-                `).join('');
+                    `).join('');
                     } catch (error) {
                         console.error('Erro ao renderizar categorias:', error);
                         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar categorias.</td></tr>';
@@ -253,14 +253,39 @@
                     } else {
                         // Add mode
                         document.getElementById('modal-title').textContent = 'Nova Categoria';
-                        form.reset();
                         document.getElementById('category-id').value = '';
+                        document.getElementById('category-name').value = '';
+                        document.getElementById('category-slug').value = '';
                     }
                 }
 
                 function closeCategoryModal() {
                     modal.style.display = 'none';
                 }
+
+                function addSubcategoryInput(name = '', slug = '', id = '') {
+                    const container = document.getElementById('subcategories-container');
+                    const div = document.createElement('div');
+                    div.className = 'subcategory-item';
+                    div.style = 'display: flex; gap: 10px; margin-bottom: 10px;';
+                    div.innerHTML = `
+                <input type="hidden" class="sub-id" value="${id}">
+                <input type="text" class="form-control sub-name" placeholder="Nome da Subcategoria" value="${name}" required>
+                <input type="text" class="form-control sub-slug" placeholder="Slug" value="${slug}" readonly style="background: #f5f5f5;">
+                <button type="button" class="btn-primary" style="background: #dc3545;" onclick="this.parentElement.remove()">X</button>
+            `;
+
+                    const nameInput = div.querySelector('.sub-name');
+                    const slugInput = div.querySelector('.sub-slug');
+
+                    nameInput.addEventListener('input', () => {
+                        slugInput.value = db.generateSlug(nameInput.value);
+                    });
+
+                    container.appendChild(div);
+                }
+
+                window.addSubcategoryField = () => addSubcategoryInput();
 
                 function toggleCatUploadType() {
                     const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
@@ -276,44 +301,17 @@
                     }
                 }
 
-                // Image Processing
+                // File Reader
                 document.getElementById('category-image').addEventListener('change', function (e) {
                     const file = e.target.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = function (e) {
-                            document.getElementById('category-image-base64').value = e.target.result;
-                        };
+                        reader.onloadend = function () {
+                            document.getElementById('category-image-base64').value = reader.result;
+                        }
                         reader.readAsDataURL(file);
                     }
                 });
-
-                // Subcategory Logic
-                function addSubcategoryField(name = '', slug = '', id = null) {
-                    const container = document.getElementById('subcategories-container');
-                    const div = document.createElement('div');
-                    div.className = 'subcategory-item';
-                    div.style.display = 'flex';
-                    div.style.gap = '10px';
-                    div.style.marginBottom = '10px';
-
-                    div.innerHTML = `
-                <input type="hidden" class="sub-id" value="${id || ''}">
-                <input type="text" class="form-control sub-name" placeholder="Nome" value="${name}" required style="flex: 1;">
-                <input type="text" class="form-control sub-slug" placeholder="Slug (Auto)" value="${slug}" readonly style="background: #eee; flex: 1;">
-                <button type="button" class="btn-primary" style="background: #dc3545; padding: 0 15px;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
-            `;
-
-                    // Auto-generate slug for subcategory
-                    const nameInput = div.querySelector('.sub-name');
-                    const slugInput = div.querySelector('.sub-slug');
-
-                    nameInput.addEventListener('input', () => {
-                        slugInput.value = db.generateSlug(nameInput.value);
-                    });
-
-                    container.appendChild(div);
-                }
 
                 // Auto-generate slug for main category
                 document.getElementById('category-name').addEventListener('input', (e) => {
@@ -377,227 +375,32 @@
                     }
                 });
 
-                // Mobile Toggle Logic
-                const mobileBtn = document.getElementById('mobile-menu-btn');
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('mobile-overlay');
-
-                if (mobileBtn) {
-                    mobileBtn.addEventListener('click', () => {
-                        sidebar.classList.toggle('active');
-                        overlay.classList.toggle('active');
-                    });
-                }
-
-                if (overlay) {
-                    overlay.addEventListener('click', () => {
-                        sidebar.classList.remove('active');
-                        overlay.classList.remove('active');
-                    });
-                }
-
-                // Category Management Logic
-                async function renderCategories() {
-                    const tbody = document.getElementById('categories-list');
-                    try {
-                        const categories = await db.getCategories();
-
-                        if (!categories || categories.length === 0) {
-                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma categoria cadastrada.</td></tr>';
-                            return;
-                        }
-
-                        tbody.innerHTML = categories.map(c => `
-                            <tr>
-                                <td>
-                                    ${c.image ? `<img src="${c.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` : '<span style="color:#ccc;">Sem img</span>'}
-                                </td>
-                                <td>${c.name}</td>
-                                <td>${c.slug}</td>
-                                <td>${c.subcategories ? c.subcategories.length : 0} subcategorias</td>
-                                <td>
-                                    <button class="action-btn" onclick="editCategory(${c.id})"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn delete" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            `).join('');
-                    } catch (error) {
-                        console.error('Erro ao renderizar categorias:', error);
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar categorias.</td></tr>';
-                    }
-                }
-
-                // Modal Functions
-                const modal = document.getElementById('category-modal');
-                const form = document.getElementById('category-form');
-
-                function openCategoryModal(categoryId = null) {
-                    modal.style.display = 'flex';
-                    const container = document.getElementById('subcategories-container');
-                    container.innerHTML = '';
-
-                    // Reset Image Inputs
-                    document.getElementById('category-image').value = '';
-                    document.getElementById('category-image-base64').value = '';
-                    document.getElementById('category-url').value = '';
-                    toggleCatUploadType();
-
-                    if (categoryId) {
-                        // Edit mode
-                        document.getElementById('modal-title').textContent = 'Editar Categoria';
-                        // Load data logic handled in editCategory
-                    } else {
-                        // Add mode
-                        document.getElementById('modal-title').textContent = 'Nova Categoria';
-                        form.reset();
-                        document.getElementById('category-id').value = '';
-                    }
-                }
-
-                function closeCategoryModal() {
-                    modal.style.display = 'none';
-                }
-
-                function toggleCatUploadType() {
-                    const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
-                    const fileInput = document.getElementById('cat-file-input');
-                    const urlInput = document.getElementById('cat-url-input');
-
-                    if (type === 'file') {
-                        fileInput.style.display = 'block';
-                        urlInput.style.display = 'none';
-                    } else {
-                        fileInput.style.display = 'none';
-                        urlInput.style.display = 'block';
-                    }
-                }
-
-                // Image Processing
-                document.getElementById('category-image').addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            document.getElementById('category-image-base64').value = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-
-                // Subcategory Logic
-                function addSubcategoryField(name = '', slug = '', id = null) {
-                    const container = document.getElementById('subcategories-container');
-                    const div = document.createElement('div');
-                    div.className = 'subcategory-item';
-                    div.style.display = 'flex';
-                    div.style.gap = '10px';
-                    div.style.marginBottom = '10px';
-
-                    div.innerHTML = `
-                            <input type="hidden" class="sub-id" value="${id || ''}">
-                                <input type="text" class="form-control sub-name" placeholder="Nome" value="${name}" required style="flex: 1;">
-                                    <input type="text" class="form-control sub-slug" placeholder="Slug (Auto)" value="${slug}" readonly style="background: #eee; flex: 1;">
-                                        <button type="button" class="btn-primary" style="background: #dc3545; padding: 0 15px;" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
-            `;
-
-                    // Auto-generate slug for subcategory
-                    const nameInput = div.querySelector('.sub-name');
-                    const slugInput = div.querySelector('.sub-slug');
-
-                    nameInput.addEventListener('input', () => {
-                        slugInput.value = db.generateSlug(nameInput.value);
-                    });
-
-                    container.appendChild(div);
-                }
-
-                // Auto-generate slug for main category
-                document.getElementById('category-name').addEventListener('input', (e) => {
-                    document.getElementById('category-slug').value = db.generateSlug(e.target.value);
-                });
-
-                // Form Submit
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const subItems = document.querySelectorAll('.subcategory-item');
-                    const subcategories = Array.from(subItems).map(item => ({
-                        id: item.querySelector('.sub-id').value || Date.now() + Math.floor(Math.random() * 1000),
-                        name: item.querySelector('.sub-name').value,
-                        slug: item.querySelector('.sub-slug').value
-                    }));
-
-                    const categoryId = document.getElementById('category-id').value;
-
-                    // Handle Image
-                    const type = document.querySelector('input[name="cat-upload-type"]:checked').value;
-                    let image = type === 'file'
-                        ? document.getElementById('category-image-base64').value
-                        : document.getElementById('category-url').value;
-
-                    const category = {
-                        name: document.getElementById('category-name').value,
-                        slug: document.getElementById('category-slug').value,
-                        subcategories: subcategories,
-                        image: image // Add image
-                    };
-
-                    try {
-                        if (categoryId) {
-                            category.id = parseInt(categoryId);
-                            await db.updateCategory(category);
-                            alert('Categoria atualizada com sucesso!');
-                        } else {
-                            await db.addCategory(category);
-                            alert('Categoria criada com sucesso!');
-                        }
-
-                        closeCategoryModal();
-                        await renderCategories();
-                    } catch (error) {
-                        console.error('Erro ao salvar categoria:', error);
-                        alert('Erro ao salvar categoria: ' + (error.message || error));
-                    }
-                });
-
                 window.editCategory = async (id) => {
+                    openCategoryModal(id);
+                    document.getElementById('category-id').value = id;
+
                     try {
                         const categories = await db.getCategories();
-                        const category = categories.find(c => c.id === id);
-                        if (!category) return;
+                        const cat = categories.find(c => c.id === id);
+                        if (!cat) return;
 
-                        document.getElementById('category-id').value = category.id;
-                        document.getElementById('category-name').value = category.name;
-                        document.getElementById('category-slug').value = category.slug;
+                        document.getElementById('category-name').value = cat.name;
+                        document.getElementById('category-slug').value = cat.slug;
 
-                        openCategoryModal(id);
-
-                        // Pre-fill Image
-                        if (category.image) {
-                            if (category.image.startsWith('http') && !category.image.startsWith('data:')) {
-                                document.querySelector('input[name="cat-upload-type"][value="url"]').checked = true;
-                                document.getElementById('category-url').value = category.image;
-                                toggleCatUploadType();
-                            } else {
-                                document.querySelector('input[name="cat-upload-type"][value="file"]').checked = true;
-                                document.getElementById('category-image-base64').value = category.image;
-                                toggleCatUploadType();
-                            }
-                        } else {
-                            document.querySelector('input[name="cat-upload-type"][value="file"]').checked = true;
-                            document.getElementById('category-image').value = '';
-                            document.getElementById('category-image-base64').value = '';
-                            document.getElementById('category-url').value = '';
-                            toggleCatUploadType();
+                        // Pre-fill image if it's a URL
+                        if (cat.image) {
+                            // If base64, we can't easily put it back in file input, but we can put it in hidden base64 field?
+                            // Or just use URL field. 
+                            document.getElementById('category-url').value = cat.image;
+                            // Set to URL tab
+                            document.querySelectorAll('input[name="cat-upload-type"]')[1].click();
                         }
 
-                        // Pre-fill subcategories
-                        const subcategoriesContainer = document.getElementById('subcategories-container');
-                        subcategoriesContainer.innerHTML = '';
-                        if (category.subcategories && category.subcategories.length > 0) {
-                            category.subcategories.forEach(sub => addSubcategoryField(sub.name, sub.slug, sub.id));
+                        if (cat.subcategories) {
+                            cat.subcategories.forEach(sub => {
+                                addSubcategoryInput(sub.name, sub.slug, sub.id);
+                            });
                         }
-
                     } catch (error) {
                         console.error('Erro ao carregar categoria para edição:', error);
                         alert('Erro ao carregar categoria para edição.');
@@ -619,6 +422,8 @@
                 // Initialize
                 document.addEventListener('DOMContentLoaded', renderCategories);
             </script>
+        </main>
+    </div>
 </body>
 
 </html>
