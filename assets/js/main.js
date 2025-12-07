@@ -21,17 +21,24 @@ class App {
     }
 
     initHeroSlider() {
+        if (this.sliderInterval) clearInterval(this.sliderInterval);
+
         const slides = document.querySelectorAll('.slide');
         if (slides.length === 0) return;
 
         let currentSlide = 0;
+        // Set first active if none
+        if (!document.querySelector('.slide.active')) {
+            slides[0].classList.add('active');
+        }
+
         const nextSlide = () => {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
             slides[currentSlide].classList.add('active');
         };
 
-        setInterval(nextSlide, 5000);
+        this.sliderInterval = setInterval(nextSlide, 5000);
     }
 
     bindEvents() {
@@ -179,142 +186,110 @@ class App {
                 </div>
             </div>
         `).join('');
+        currency: 'BRL'
+    }).format(value);
+}
 
-        totalEl.textContent = this.formatCurrency(this.getCartTotal());
-    }
+showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
 
-    // Banner System
-    async loadBanners() {
-        const bannerContainer = document.querySelector('.promo-banners-grid');
-        if (!bannerContainer) return;
+    // Add styles dynamically if not in CSS
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.background = 'var(--color-black)';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '4px';
+    toast.style.zIndex = '1000';
+    toast.style.animation = 'fadeIn 0.3s ease';
 
-        // db is global
-        const banners = await db.getBanners();
-
-        if (banners.length === 0) {
-            // Fallback to default if no banners
-            return;
-        }
-
-        bannerContainer.innerHTML = banners.map(banner => `
-            <div class="promo-banner" onclick="window.location.href='${banner.link}'" style="cursor: pointer;">
-                <img src="${banner.image}" alt="${banner.title}">
-                <div class="promo-content">
-                    <h3>${banner.title}</h3>
-                    <a href="${banner.link}" class="btn btn-primary">Confira</a>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    // UI Helpers
-    formatCurrency(value) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
-    }
-
-    showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        // Add styles dynamically if not in CSS
-        toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
-        toast.style.right = '20px';
-        toast.style.background = 'var(--color-black)';
-        toast.style.color = 'white';
-        toast.style.padding = '12px 24px';
-        toast.style.borderRadius = '4px';
-        toast.style.zIndex = '1000';
-        toast.style.animation = 'fadeIn 0.3s ease';
-
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
 
     async renderHeaderUser() {
-        const user = await authService.getCurrentUser();
-        const accountLink = document.querySelector('.account-link');
-        if (accountLink) {
-            if (user) {
-                accountLink.href = 'account.html';
-                accountLink.innerHTML = `<i class="fas fa-user-check"></i>`; // Logged in icon
-            } else {
-                accountLink.href = 'login.html';
-                accountLink.innerHTML = `<i class="far fa-user"></i>`;
-            }
+    const user = await authService.getCurrentUser();
+    const accountLink = document.querySelector('.account-link');
+    if (accountLink) {
+        if (user) {
+            accountLink.href = 'account.html';
+            accountLink.innerHTML = `<i class="fas fa-user-check"></i>`; // Logged in icon
+        } else {
+            accountLink.href = 'login.html';
+            accountLink.innerHTML = `<i class="far fa-user"></i>`;
         }
     }
+}
 
-    injectSearchOverlay() {
-        // Do not inject in admin panel
-        if (window.location.pathname.includes('/admin/')) return;
+injectSearchOverlay() {
+    // Do not inject in admin panel
+    if (window.location.pathname.includes('/admin/')) return;
 
-        if (!document.querySelector('.search-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'search-overlay';
-            overlay.innerHTML = `
+    if (!document.querySelector('.search-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'search-overlay';
+        overlay.innerHTML = `
                 <div class="search-container">
                     <button class="close-search"><i class="fas fa-times"></i></button>
                     <input type="text" class="search-input" placeholder="O QUE VOCÊ PROCURA?">
                 </div>
             `;
-            document.body.appendChild(overlay);
+        document.body.appendChild(overlay);
+    }
+}
+
+bindSearchEvents() {
+    this.injectSearchOverlay();
+
+    const triggers = document.querySelectorAll('.search-trigger');
+    const overlay = document.querySelector('.search-overlay');
+    const closeBtn = document.querySelector('.close-search');
+    const input = document.querySelector('.search-overlay .search-input');
+
+    if (!overlay) return;
+
+    triggers.forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            overlay.classList.add('active');
+            setTimeout(() => input.focus(), 100);
+        });
+    });
+
+    const closeSearch = () => {
+        overlay.classList.remove('active');
+        input.value = '';
+    };
+
+    closeBtn?.addEventListener('click', closeSearch);
+
+    // Close on click outside
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeSearch();
+    });
+
+    // Handle Enter key
+    input?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = input.value.trim();
+            if (query) {
+                window.location.href = `category.html?search=${encodeURIComponent(query)}`;
+            }
         }
-    }
+    });
 
-    bindSearchEvents() {
-        this.injectSearchOverlay();
-
-        const triggers = document.querySelectorAll('.search-trigger');
-        const overlay = document.querySelector('.search-overlay');
-        const closeBtn = document.querySelector('.close-search');
-        const input = document.querySelector('.search-overlay .search-input');
-
-        if (!overlay) return;
-
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', (e) => {
-                e.preventDefault();
-                overlay.classList.add('active');
-                setTimeout(() => input.focus(), 100);
-            });
-        });
-
-        const closeSearch = () => {
-            overlay.classList.remove('active');
-            input.value = '';
-        };
-
-        closeBtn?.addEventListener('click', closeSearch);
-
-        // Close on click outside
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeSearch();
-        });
-
-        // Handle Enter key
-        input?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const query = input.value.trim();
-                if (query) {
-                    window.location.href = `category.html?search=${encodeURIComponent(query)}`;
-                }
-            }
-        });
-
-        // Close on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && overlay.classList.contains('active')) {
-                closeSearch();
-            }
-        });
-    }
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            closeSearch();
+        }
+    });
+}
 }
 
 const app = new App();
