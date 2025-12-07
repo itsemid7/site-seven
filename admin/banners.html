@@ -326,65 +326,68 @@
                     `;
                         container.appendChild(div);
                     });
+                    // Auto-seed removed
+
                 } catch (error) {
                     console.error('Erro ao carregar banners:', error);
                     container.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar banners.</p>';
                 }
             }
+            }
 
         // Save Banner
         form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const type = document.querySelector('input[name="upload-type"]:checked').value;
-                let image, imageMobile;
+            e.preventDefault();
+            const type = document.querySelector('input[name="upload-type"]:checked').value;
+            let image, imageMobile;
 
-                if (type === 'file') {
-                    image = document.getElementById('banner-image-base64').value;
-                    imageMobile = document.getElementById('banner-image-mobile-base64').value;
-                } else {
-                    image = document.getElementById('banner-url').value;
-                    imageMobile = document.getElementById('banner-url-mobile').value;
-                }
+            if (type === 'file') {
+                image = document.getElementById('banner-image-base64').value;
+                imageMobile = document.getElementById('banner-image-mobile-base64').value;
+            } else {
+                image = document.getElementById('banner-url').value;
+                imageMobile = document.getElementById('banner-url-mobile').value;
+            }
 
-                if (!image) {
-                    alert('Por favor, selecione uma imagem ou insira uma URL.');
-                    return;
-                }
+            if (!image) {
+                alert('Por favor, selecione uma imagem ou insira uma URL.');
+                return;
+            }
 
-                const newBanner = {
-                    image: image,
-                    image_mobile: imageMobile,
-                    link: document.getElementById('banner-link').value,
-                    alt: document.getElementById('banner-alt').value,
-                    type: document.getElementById('banner-type').value
-                };
-
-                try {
-                    await db.addBanner(newBanner);
-                    closeBannerModal();
-                    await loadBanners();
-                    alert('Banner adicionado com sucesso!');
-                } catch (error) {
-                    console.error('Erro ao salvar banner:', error);
-                    alert('Erro ao salvar banner. Verifique o console.');
-                }
-            });
-
-            // Delete Banner
-            window.deleteBanner = async function (id) {
-                if (confirm('Tem certeza que deseja remover este banner?')) {
-                    try {
-                        await db.deleteBanner(id);
-                        await loadBanners();
-                    } catch (error) {
-                        console.error('Erro ao deletar:', error);
-                        alert('Erro ao remover banner.');
-                    }
-                }
+            const newBanner = {
+                image: image,
+                image_mobile: imageMobile,
+                link: document.getElementById('banner-link').value,
+                alt: document.getElementById('banner-alt').value,
+                type: document.getElementById('banner-type').value
             };
 
-            // Initialize
-            document.addEventListener('DOMContentLoaded', loadBanners);
+            try {
+                await db.addBanner(newBanner);
+                closeBannerModal();
+                await loadBanners();
+                alert('Banner adicionado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao salvar banner:', error);
+                alert('Erro ao salvar banner. Verifique o console.');
+            }
+        });
+
+        // Delete Banner
+        window.deleteBanner = async function (id) {
+            if (confirm('Tem certeza que deseja remover este banner?')) {
+                try {
+                    await db.deleteBanner(id);
+                    await loadBanners();
+                } catch (error) {
+                    console.error('Erro ao deletar:', error);
+                    alert('Erro ao remover banner.');
+                }
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadBanners);
     </script>
 </body>
 
