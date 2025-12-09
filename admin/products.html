@@ -145,12 +145,22 @@
         <main class="main-content">
             <div class="page-header">
                 <h2 class="text-display">Gerenciar Produtos</h2>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="position: relative;">
+                        <i class="fas fa-search"
+                            style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                        <input type="text" id="product-search" placeholder="Buscar produto..."
+                            style="padding: 8px 8px 8px 35px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                    </div>
+                    <select id="category-filter" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Todas as Categorias</option>
+                    </select>
+
                     <a href="compress_images.html" class="btn-primary" style="background: #6c757d;">
-                        <i class="fas fa-compress-arrows-alt"></i> Otimizar Imagens
+                        <i class="fas fa-compress-arrows-alt"></i> Otimizar
                     </a>
                     <button class="btn-primary" onclick="openProductModal()">
-                        <i class="fas fa-plus"></i> Novo Produto
+                        <i class="fas fa-plus"></i> Novo
                     </button>
                 </div>
             </div>
@@ -446,13 +456,25 @@
                     return;
                 }
 
+                // Filter logic
+                let filtered = products;
+                if (currentSearch) {
+                    filtered = filtered.filter(p => p.name.toLowerCase().includes(currentSearch));
+                }
+                if (currentCategory) {
+                    filtered = filtered.filter(p => p.category_id == currentCategory);
+                }
+
                 // Fetch categories for mapping
                 const categories = await db.getCategories();
                 const catMap = {};
                 categories.forEach(c => catMap[c.id] = c.name);
 
                 if (tbody) {
-                    tbody.innerHTML = products.map(p => `
+                    if (filtered.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum produto corresponde à busca.</td></tr>';
+                    } else {
+                        tbody.innerHTML = filtered.map(p => `
                         <tr>
                             <td>
                                 <img src="${(p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://via.placeholder.com/50')}" 
@@ -473,6 +495,7 @@
                             </td>
                         </tr>
                     `).join('');
+                    }
                 }
             } catch (error) {
                 console.error('Erro ao carregar produtos:', error);
