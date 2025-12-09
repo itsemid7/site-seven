@@ -1,36 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    await renderBanners();
+    // await renderBanners(); // Removed to avoid conflict with main.js
     await renderHomeCategories();
     await renderFeaturedProducts();
 });
 
-async function renderBanners() {
-    const sliderContainer = document.querySelector('.slider-container');
-    if (!sliderContainer) return;
+// renderBanners removed
 
-    try {
-        const banners = await db.getBanners();
-
-        if (banners && banners.length > 0) {
-            sliderContainer.innerHTML = banners.map((banner, index) => `
-                <div class="slide ${index === 0 ? 'active' : ''}"
-                    style="background-image: url('${banner.image}');">
-                    <div class="slide-content container">
-                        <h2 class="text-display">${banner.alt || 'NOVA COLEÇÃO'}</h2>
-                        <p>Confira as novidades e ofertas exclusivas.</p>
-                        <a href="${banner.link || '#'}" class="btn btn-primary">VER MAIS</a>
-                    </div>
-                </div>
-            `).join('');
-
-            // Re-initialize slider logic if needed (assuming CSS handles simple active class or main.js has logic)
-            // If main.js has a slider interval, it might need to be restarted or it might just work if it selects .slide
-            // Let's check main.js later if slider doesn't auto-rotate.
-        }
-    } catch (error) {
-        console.error('Erro ao carregar banners:', error);
-    }
-}
 
 async function renderHomeCategories() {
     const container = document.getElementById('home-categories');
