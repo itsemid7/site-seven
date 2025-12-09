@@ -180,21 +180,6 @@ class App {
                              <button onclick="app.updateQuantity(${index}, -1)" style="border:none; background:none; cursor:pointer; padding: 0 5px;">-</button>
                              <span style="font-size: 0.9rem;">${item.quantity}</span>
                              <button onclick="app.updateQuantity(${index}, 1)" style="border:none; background:none; cursor:pointer; padding: 0 5px;">+</button>
-                        </div>
-                    </div>
-                    <button onclick="app.removeFromCart(${index})" style="color: #999; font-size: 0.7rem; background: none; border: none; cursor: pointer; margin-top: 8px; text-decoration: underline;">Remover</button>
-                </div>
-            </div>
-        `).join('');
-        currency: 'BRL'
-    }).format(value);
-}
-
-showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    document.body.appendChild(toast);
 
     // Add styles dynamically if not in CSS
     toast.style.position = 'fixed';
@@ -218,10 +203,10 @@ showToast(message) {
     if (accountLink) {
         if (user) {
             accountLink.href = 'account.html';
-            accountLink.innerHTML = `<i class="fas fa-user-check"></i>`; // Logged in icon
+            accountLink.innerHTML = `< i class= "fas fa-user-check" ></i > `; // Logged in icon
         } else {
             accountLink.href = 'login.html';
-            accountLink.innerHTML = `<i class="far fa-user"></i>`;
+            accountLink.innerHTML = `< i class= "far fa-user" ></i > `;
         }
     }
 }
@@ -234,7 +219,7 @@ injectSearchOverlay() {
         const overlay = document.createElement('div');
         overlay.className = 'search-overlay';
         overlay.innerHTML = `
-                <div class="search-container">
+        < div class= "search-container" >
                     <button class="close-search"><i class="fas fa-times"></i></button>
                     <input type="text" class="search-input" placeholder="O QUE VOCÊ PROCURA?">
                 </div>
@@ -278,7 +263,7 @@ bindSearchEvents() {
         if (e.key === 'Enter') {
             const query = input.value.trim();
             if (query) {
-                window.location.href = `category.html?search=${encodeURIComponent(query)}`;
+                window.location.href = `category.html ? search = ${ encodeURIComponent(query) }`;
             }
         }
     });
