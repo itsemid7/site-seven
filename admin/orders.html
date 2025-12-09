@@ -71,6 +71,77 @@
             padding: 8px;
             border-bottom: 1px solid #eee;
             text-align: left;
+            vertical-align: middle;
+        }
+
+        .product-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: transform 0.2s;
+        }
+
+        .product-thumbnail:hover {
+            transform: scale(1.1);
+        }
+
+        /* Image Lightbox */
+        #image-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+            animation: zoom 0.3s;
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(0)
+            }
+
+            to {
+                transform: scale(1)
+            }
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .close-lightbox:hover,
+        .close-lightbox:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -165,6 +236,7 @@
                 <table class="order-items-table">
                     <thead>
                         <tr>
+                            <th>Imagem</th>
                             <th>Produto</th>
                             <th>Tam/Cor</th>
                             <th>Qtd</th>
@@ -193,6 +265,13 @@
                 </div>
             </div>
         </div>
+    </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="image-modal" class="modal" onclick="closeImageModal()">
+        <span class="close-lightbox" onclick="closeImageModal()">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
     </div>
     <!-- Security Modal (2FA) -->
     <div id="security-modal" class="modal">
@@ -339,15 +418,21 @@
 
             const itemsBody = document.getElementById('detail-items');
             if (order.items) {
-                itemsBody.innerHTML = order.items.map(item => `
+                itemsBody.innerHTML = order.items.map(item => {
+                    // Check for image in various possible locations
+                    const img = item.image || item.product_image || (item.product && item.product.image) || 'https://via.placeholder.com/50';
+                    return `
                     <tr>
+                        <td>
+                            <img src="${img}" class="product-thumbnail" onclick="openImageModal('${img}')" alt="Foto">
+                        </td>
                         <td>${item.name}</td>
                         <td>${item.selectedSize || '-'} / ${item.selectedColor || '-'}</td>
                         <td>${item.quantity}</td>
                         <td>${app.formatCurrency(item.price)}</td>
                         <td>${app.formatCurrency(item.price * item.quantity)}</td>
                     </tr>
-                `).join('');
+                `}).join('');
             } else {
                 itemsBody.innerHTML = '';
             }
@@ -357,6 +442,18 @@
 
         function closeOrderModal() {
             modal.style.display = 'none';
+        }
+
+        // Image Lightbox Functions
+        function openImageModal(src) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('lightbox-img');
+            modal.style.display = "flex";
+            modalImg.src = src;
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-modal').style.display = "none";
         }
 
         async function updateStatus() {

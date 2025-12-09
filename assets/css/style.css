@@ -413,6 +413,13 @@ img {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.promo-content .btn {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+    background-color: var(--color-black); /* Ensure visibility against image */
+    border: 1px solid rgba(255,255,255,0.2); /* Subtle border */
+}
+
 /* Categories & Products Grid */
 .categories-grid,
 .products-grid {
