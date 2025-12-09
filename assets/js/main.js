@@ -88,70 +88,87 @@ class App {
                 name: product.name,
                 price: product.price,
                 price_promo: product.price_promo,
+                image: imageUrl, // Store only the main image
+                slug: product.slug,
+                size: size,
+                color: color,
+                quantity: quantity,
+                weight: product.weight // Needed for freight
+            });
+        }
 
-                updateQuantity(index, delta) {
-                    const item = this.cart[index];
-                    if (item.quantity + delta > 0) {
-                        item.quantity += delta;
-                        this.saveCart();
-                    }
-                }
+        this.saveCart();
+        this.showToast('Produto adicionado ao carrinho!');
+    }
+
+    removeFromCart(index) {
+        this.cart.splice(index, 1);
+        this.saveCart();
+    }
+
+    updateQuantity(index, delta) {
+        const item = this.cart[index];
+        if (item.quantity + delta > 0) {
+            item.quantity += delta;
+            this.saveCart();
+        }
+    }
 
     saveCart() {
-                    localStorage.setItem('seven_cart', JSON.stringify(this.cart));
-                    this.updateCartCount();
-                    // If cart sidebar is active, re-render it
-                    if (document.querySelector('.cart-sidebar.active')) {
-                        this.renderCartDrawer();
-                    }
-                }
+        localStorage.setItem('seven_cart', JSON.stringify(this.cart));
+        this.updateCartCount();
+        // If cart sidebar is active, re-render it
+        if (document.querySelector('.cart-sidebar.active')) {
+            this.renderCartDrawer();
+        }
+    }
 
     updateCartCount() {
-                    const count = this.cart.reduce((acc, item) => acc + item.quantity, 0);
-                    const badges = document.querySelectorAll('.cart-count');
-                    badges.forEach(b => {
-                        b.textContent = count;
-                        b.style.display = count > 0 ? 'flex' : 'none';
-                    });
-                }
+        const count = this.cart.reduce((acc, item) => acc + item.quantity, 0);
+        const badges = document.querySelectorAll('.cart-count');
+        badges.forEach(b => {
+            b.textContent = count;
+            b.style.display = count > 0 ? 'flex' : 'none';
+        });
+    }
 
     getCartTotal() {
-                    return this.cart.reduce((acc, item) => {
-                        const price = item.price_promo || item.price;
-                        return acc + (price * item.quantity);
-                    }, 0);
-                }
+        return this.cart.reduce((acc, item) => {
+            const price = item.price_promo || item.price;
+            return acc + (price * item.quantity);
+        }, 0);
+    }
 
     toggleCart() {
-                    const sidebar = document.getElementById('cart-sidebar');
-                    const overlay = document.querySelector('.cart-overlay');
+        const sidebar = document.getElementById('cart-sidebar');
+        const overlay = document.querySelector('.cart-overlay');
 
-                    if (sidebar && overlay) {
-                        sidebar.classList.toggle('active');
-                        overlay.classList.toggle('active');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
 
-                        if (sidebar.classList.contains('active')) {
-                            this.renderCartDrawer();
-                        }
-                    } else {
-                        // Fallback for pages without sidebar (like index.html currently)
-                        window.location.href = 'checkout.html';
-                    }
-                }
+            if (sidebar.classList.contains('active')) {
+                this.renderCartDrawer();
+            }
+        } else {
+            // Fallback for pages without sidebar (like index.html currently)
+            window.location.href = 'checkout.html';
+        }
+    }
 
     renderCartDrawer() {
-                    const container = document.getElementById('cart-items');
-                    const totalEl = document.getElementById('cart-total-price');
+        const container = document.getElementById('cart-items');
+        const totalEl = document.getElementById('cart-total-price');
 
-                    if (!container || !totalEl) return;
+        if (!container || !totalEl) return;
 
-                    if (this.cart.length === 0) {
-                        container.innerHTML = '<p style="text-align:center; padding:20px; color: #666;">Seu carrinho está vazio.</p>';
-                        totalEl.textContent = this.formatCurrency(0);
-                        return;
-                    }
+        if (this.cart.length === 0) {
+            container.innerHTML = '<p style="text-align:center; padding:20px; color: #666;">Seu carrinho está vazio.</p>';
+            totalEl.textContent = this.formatCurrency(0);
+            return;
+        }
 
-                    container.innerHTML = this.cart.map((item, index) => `
+        container.innerHTML = this.cart.map((item, index) => `
             <div class="cart-item">
                 <img src="${item.image}" alt="${item.name}">
                 <div class="cart-item-details">
@@ -170,129 +187,129 @@ class App {
             </div>
         `).join('');
 
-                    totalEl.textContent = this.formatCurrency(this.getCartTotal());
-                }
+        totalEl.textContent = this.formatCurrency(this.getCartTotal());
+    }
 
     showToast(message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'toast';
-                    toast.textContent = message;
-                    document.body.appendChild(toast);
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
 
-                    // Add styles dynamically if not in CSS
-                    toast.style.position = 'fixed';
-                    toast.style.bottom = '20px';
-                    toast.style.right = '20px';
-                    toast.style.background = 'var(--color-black)';
-                    toast.style.color = 'white';
-                    toast.style.padding = '12px 24px';
-                    toast.style.borderRadius = '4px';
-                    toast.style.zIndex = '1000';
-                    toast.style.animation = 'fadeIn 0.3s ease';
+        // Add styles dynamically if not in CSS
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.background = 'var(--color-black)';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '4px';
+        toast.style.zIndex = '1000';
+        toast.style.animation = 'fadeIn 0.3s ease';
 
-                    setTimeout(() => {
-                        toast.remove();
-                    }, 3000);
-                }
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
 
     async renderHeaderUser() {
-                    const user = await authService.getCurrentUser();
-                    const accountLink = document.querySelector('.account-link');
-                    if (accountLink) {
-                        if (user) {
-                            accountLink.href = 'account.html';
-                            accountLink.innerHTML = `<i class="fas fa-user-check"></i>`; // Logged in icon
-                        } else {
-                            accountLink.href = 'login.html';
-                            accountLink.innerHTML = `<i class="far fa-user"></i>`;
-                        }
-                    }
-                }
+        const user = await authService.getCurrentUser();
+        const accountLink = document.querySelector('.account-link');
+        if (accountLink) {
+            if (user) {
+                accountLink.href = 'account.html';
+                accountLink.innerHTML = `<i class="fas fa-user-check"></i>`; // Logged in icon
+            } else {
+                accountLink.href = 'login.html';
+                accountLink.innerHTML = `<i class="far fa-user"></i>`;
+            }
+        }
+    }
 
     injectSearchOverlay() {
-                    // Do not inject in admin panel
-                    if (window.location.pathname.includes('/admin/')) return;
+        // Do not inject in admin panel
+        if (window.location.pathname.includes('/admin/')) return;
 
-                    if (!document.querySelector('.search-overlay')) {
-                        const overlay = document.createElement('div');
-                        overlay.className = 'search-overlay';
-                        overlay.innerHTML = `
+        if (!document.querySelector('.search-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'search-overlay';
+            overlay.innerHTML = `
                 <div class="search-container">
                     <button class="close-search"><i class="fas fa-times"></i></button>
                     <input type="text" class="search-input" placeholder="O QUE VOCÊ PROCURA?">
                 </div>
             `;
-                        document.body.appendChild(overlay);
-                    }
-                }
+            document.body.appendChild(overlay);
+        }
+    }
 
     bindSearchEvents() {
-                    this.injectSearchOverlay();
+        this.injectSearchOverlay();
 
-                    const triggers = document.querySelectorAll('.search-trigger');
-                    const overlay = document.querySelector('.search-overlay');
-                    const closeBtn = document.querySelector('.close-search');
-                    const input = document.querySelector('.search-overlay .search-input');
+        const triggers = document.querySelectorAll('.search-trigger');
+        const overlay = document.querySelector('.search-overlay');
+        const closeBtn = document.querySelector('.close-search');
+        const input = document.querySelector('.search-overlay .search-input');
 
-                    if (!overlay) return;
+        if (!overlay) return;
 
-                    triggers.forEach(trigger => {
-                        trigger.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            overlay.classList.add('active');
-                            setTimeout(() => input.focus(), 100);
-                        });
-                    });
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                overlay.classList.add('active');
+                setTimeout(() => input.focus(), 100);
+            });
+        });
 
-                    const closeSearch = () => {
-                        overlay.classList.remove('active');
-                        input.value = '';
-                    };
+        const closeSearch = () => {
+            overlay.classList.remove('active');
+            input.value = '';
+        };
 
-                    closeBtn?.addEventListener('click', closeSearch);
+        closeBtn?.addEventListener('click', closeSearch);
 
-                    // Close on click outside
-                    overlay.addEventListener('click', (e) => {
-                        if (e.target === overlay) closeSearch();
-                    });
+        // Close on click outside
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeSearch();
+        });
 
-                    // Handle Enter key
-                    input?.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            const query = input.value.trim();
-                            if (query) {
-                                window.location.href = `category.html?search=${encodeURIComponent(query)}`;
-                            }
-                        }
-                    });
-
-                    // Close on Escape
-                    document.addEventListener('keydown', (e) => {
-                        if (e.key === 'Escape' && overlay.classList.contains('active')) {
-                            closeSearch();
-                        }
-                    });
+        // Handle Enter key
+        input?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (query) {
+                    window.location.href = `category.html?search=${encodeURIComponent(query)}`;
                 }
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                closeSearch();
+            }
+        });
+    }
 
     // Banner System (Fixed)
     async loadBanners() {
-                    // Find containers
-                    const sliderContainer = document.querySelector('.slider-container');
-                    const promoContainer = document.querySelector('.promo-banners-grid');
+        // Find containers
+        const sliderContainer = document.querySelector('.slider-container');
+        const promoContainer = document.querySelector('.promo-banners-grid');
 
-                    // Only proceed if at least one container exists
-                    if (!sliderContainer && !promoContainer) return;
+        // Only proceed if at least one container exists
+        if (!sliderContainer && !promoContainer) return;
 
-                    try {
-                        const banners = await db.getBanners();
+        try {
+            const banners = await db.getBanners();
 
-                        // 1. Filter Banners
-                        const heroBanners = banners.filter(b => b.type === 'hero');
-                        const promoBanners = banners.filter(b => b.type === 'promo' || !b.type);
+            // 1. Filter Banners
+            const heroBanners = banners.filter(b => b.type === 'hero');
+            const promoBanners = banners.filter(b => b.type === 'promo' || !b.type);
 
-                        // 2. Render Hero Slider
-                        if (sliderContainer && heroBanners.length > 0) {
-                            sliderContainer.innerHTML = heroBanners.map((b, index) => `
+            // 2. Render Hero Slider
+            if (sliderContainer && heroBanners.length > 0) {
+                sliderContainer.innerHTML = heroBanners.map((b, index) => `
                     <div class="slide ${index === 0 ? 'active' : ''}" 
                          style="background-image: url('${b.image}')"
                          onclick="window.location.href='${b.link || '#'}'">
@@ -302,13 +319,13 @@ class App {
                     </div>
                 `).join('');
 
-                            this.initHeroSlider();
-                        }
+                this.initHeroSlider();
+            }
 
-                        // 3. Render Promo Grid
-                        if (promoContainer) {
-                            if (promoBanners.length > 0) {
-                                promoContainer.innerHTML = promoBanners.map(banner => `
+            // 3. Render Promo Grid
+            if (promoContainer) {
+                if (promoBanners.length > 0) {
+                    promoContainer.innerHTML = promoBanners.map(banner => `
                         <div class="promo-banner" onclick="window.location.href='${banner.link || '#'}'" style="cursor: pointer;">
                             <img src="${banner.image}" alt="${banner.alt}">
                             <div class="promo-content">
@@ -317,30 +334,30 @@ class App {
                             </div>
                         </div>
                     `).join('');
-                                promoContainer.parentElement.style.display = 'block';
-                            } else {
-                                promoContainer.innerHTML = '';
-                                promoContainer.parentElement.style.display = 'none'; // Clear ghost banners
-                            }
-                        }
-
-                    } catch (e) {
-                        // Passive fail - don't crash app
-                        console.log('Banners not loaded or empty.');
-                    }
-                }
-
-    formatCurrency(value) {
-                    return new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                    }).format(value);
+                    promoContainer.parentElement.style.display = 'block';
+                } else {
+                    promoContainer.innerHTML = '';
+                    promoContainer.parentElement.style.display = 'none'; // Clear ghost banners
                 }
             }
 
-const app = new App();
-            window.app = app;
+        } catch (e) {
+            // Passive fail - don't crash app
+            console.log('Banners not loaded or empty.');
+        }
+    }
 
-            document.addEventListener('DOMContentLoaded', () => {
-                app.bindSearchEvents();
-            });
+    formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
+    }
+}
+
+const app = new App();
+window.app = app;
+
+document.addEventListener('DOMContentLoaded', () => {
+    app.bindSearchEvents();
+});
