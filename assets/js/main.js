@@ -321,10 +321,10 @@ class App {
             if (sliderContainer && heroBanners.length > 0) {
                 sliderContainer.innerHTML = heroBanners.map((b, index) => `
                     <div class="slide ${index === 0 ? 'active' : ''}" 
-                         style="background-image: url('${b.image}')"
-                         onclick="window.location.href='${b.link || '#'}'">
+                         style="background-image: url('${b.image}')">
                         <div class="slide-content container">
-                             <h2 class="text-display" style="display:none;">${b.alt || ''}</h2>
+                             <h2 class="text-display">${b.alt || ''}</h2>
+                             <a href="${b.link || '#'}" class="btn btn-primary">CONFIRA</a>
                         </div>
                     </div>
                 `).join('');
