@@ -497,14 +497,18 @@
                     return;
                 }
 
+                console.log('Total de produtos carregados:', products.length);
+
                 // Filter logic
                 let filtered = products;
                 if (currentSearch) {
-                    filtered = filtered.filter(p => p.name.toLowerCase().includes(currentSearch));
+                    filtered = filtered.filter(p => p.name && p.name.toLowerCase().includes(currentSearch));
                 }
                 if (currentCategory) {
                     filtered = filtered.filter(p => p.category_id == currentCategory);
                 }
+
+                console.log('Produtos filtrados:', filtered.length);
 
                 // Fetch categories for mapping
                 const categories = await db.getCategories();
@@ -518,7 +522,7 @@
                         tbody.innerHTML = filtered.map(p => `
                         <tr>
                             <td>
-                                <img src="${(p.images && p.images.length > 0) ? p.images[0] : (p.image || 'https://via.placeholder.com/50')}" 
+                                <img src="${(p.images && p.images.length > 0) ? p.images[0] : (p.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAMElEQVR4nO3OAQ0AAAgEoA9/6L2wkwWc7J2q66dPnTp16tSpU6dPnTp16tSpU6dPnTq9AAX/A05c8y7uAAAAAElFTkSuQmCC')}" 
                                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                             </td>
                             <td>${p.name}</td>
