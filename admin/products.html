@@ -544,7 +544,8 @@
                 }
             } catch (error) {
                 console.error('Erro ao carregar produtos:', error);
-                if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Erro ao carregar produtos.</td></tr>';
+                alert('Erro técnico ao carregar produtos: ' + error.message);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Erro técnico: ' + error.message + '</td></tr>';
             } finally {
                 if (spinner) spinner.style.display = 'none';
             }
