@@ -379,7 +379,10 @@
 
         // Search and Filter State
         let currentSearch = '';
+        // Search and Filter State
+        let currentSearch = '';
         let currentCategory = '';
+        let allCategories = []; // Store for subcategory lookup
 
         // Function must be defined before use or inside DOMContentLoaded for safety, but putting global listeners here
         // We will attach listeners inside DOMContentLoaded to ensure elements exist
@@ -468,17 +471,51 @@
             const select = document.getElementById('product-category');
             select.innerHTML = '<option value="">Carregando...</option>';
             try {
-                const categories = await db.getCategories();
-                if (categories.length === 0) {
+                // Fetch and store globally
+                allCategories = await db.getCategories();
+
+                if (allCategories.length === 0) {
                     select.innerHTML = '<option value="">Nenhuma categoria encontrada</option>';
                     return;
                 }
                 select.innerHTML = '<option value="">Selecione uma categoria</option>' +
-                    categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                    allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error);
                 select.innerHTML = '<option value="">Erro ao carregar</option>';
             }
+        }
+
+        function populateSubcategories(selectedSubId = null) {
+            const catId = document.getElementById('product-category').value;
+            const subSelect = document.getElementById('product-subcategory');
+
+            subSelect.innerHTML = '<option value="">Selecione primeiro a categoria</option>';
+            subSelect.disabled = true;
+
+            if (!catId) return;
+
+            const category = allCategories.find(c => c.id == catId);
+            if (!category) return;
+
+            // Check if subcategories exist and is an array
+            // It might be a JSON field or just text. Assuming JSON array or array of strings.
+            let subs = category.subcategories;
+
+            if (!subs || !Array.isArray(subs) || subs.length === 0) {
+                subSelect.innerHTML = '<option value="">Sem subcategorias</option>';
+                return;
+            }
+
+            subSelect.disabled = false;
+            subSelect.innerHTML = '<option value="">Selecione uma subcategoria</option>' +
+                subs.map(s => {
+                    // Subcategory can be a string or object {id, name}
+                    const val = typeof s === 'object' ? s.name : s;
+                    const label = typeof s === 'object' ? s.name : s;
+                    const isSelected = selectedSubId && val === selectedSubId ? 'selected' : '';
+                    return `<option value="${val}" ${isSelected}>${label}</option>`;
+                }).join('');
         }
 
         // Render Products
