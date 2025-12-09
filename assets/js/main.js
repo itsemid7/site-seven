@@ -33,9 +33,19 @@ class App {
         }
 
         const nextSlide = () => {
-            slides[currentSlide].classList.remove('active');
+            if (!slides[currentSlide]) {
+                currentSlide = 0;
+            }
+            // Double check existence
+            if (slides[currentSlide]) {
+                slides[currentSlide].classList.remove('active');
+            }
+
             currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
+
+            if (slides[currentSlide]) {
+                slides[currentSlide].classList.add('active');
+            }
         };
 
         this.sliderInterval = setInterval(nextSlide, 5000);
