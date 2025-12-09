@@ -377,6 +377,47 @@
         let currentVideo = null;
         let currentColors = [];
 
+        // Search and Filter State
+        let currentSearch = '';
+        let currentCategory = '';
+
+        // Function must be defined before use or inside DOMContentLoaded for safety, but putting global listeners here
+        // We will attach listeners inside DOMContentLoaded to ensure elements exist
+
+        async function populateCategoryFilter() {
+            const select = document.getElementById('category-filter');
+            if (!select) return;
+            try {
+                const categories = await db.getCategories();
+                select.innerHTML = '<option value="">Todas as Categorias</option>' +
+                    categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Attach listeners
+            const searchInput = document.getElementById('product-search');
+            const catFilter = document.getElementById('category-filter');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearch = e.target.value.toLowerCase();
+                    renderProducts();
+                });
+            }
+
+            if (catFilter) {
+                catFilter.addEventListener('change', (e) => {
+                    currentCategory = e.target.value;
+                    renderProducts();
+                });
+                await populateCategoryFilter();
+            }
+
+            await populateCategories();
+            renderProducts();
+        });
+
         // Elements
         const form = document.getElementById('product-form');
         const modal = document.getElementById('product-modal');
