@@ -163,106 +163,184 @@ class App {
                              <button onclick="app.updateQuantity(${index}, -1)" style="border:none; background:none; cursor:pointer; padding: 0 5px;">-</button>
                              <span style="font-size: 0.9rem;">${item.quantity}</span>
                              <button onclick="app.updateQuantity(${index}, 1)" style="border:none; background:none; cursor:pointer; padding: 0 5px;">+</button>
+                        </div>
+                    </div>
+                    <button onclick="app.removeFromCart(${index})" style="color: #999; font-size: 0.7rem; background: none; border: none; cursor: pointer; margin-top: 8px; text-decoration: underline;">Remover</button>
+                </div>
+            </div>
+        `).join('');
 
-    // Add styles dynamically if not in CSS
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.right = '20px';
-    toast.style.background = 'var(--color-black)';
-    toast.style.color = 'white';
-    toast.style.padding = '12px 24px';
-    toast.style.borderRadius = '4px';
-    toast.style.zIndex = '1000';
-    toast.style.animation = 'fadeIn 0.3s ease';
+                    totalEl.textContent = this.formatCurrency(this.getCartTotal());
+                }
 
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
+    showToast(message) {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast';
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+
+                    // Add styles dynamically if not in CSS
+                    toast.style.position = 'fixed';
+                    toast.style.bottom = '20px';
+                    toast.style.right = '20px';
+                    toast.style.background = 'var(--color-black)';
+                    toast.style.color = 'white';
+                    toast.style.padding = '12px 24px';
+                    toast.style.borderRadius = '4px';
+                    toast.style.zIndex = '1000';
+                    toast.style.animation = 'fadeIn 0.3s ease';
+
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 3000);
+                }
 
     async renderHeaderUser() {
-    const user = await authService.getCurrentUser();
-    const accountLink = document.querySelector('.account-link');
-    if (accountLink) {
-        if (user) {
-            accountLink.href = 'account.html';
-            accountLink.innerHTML = `< i class= "fas fa-user-check" ></i > `; // Logged in icon
-        } else {
-            accountLink.href = 'login.html';
-            accountLink.innerHTML = `< i class= "far fa-user" ></i > `;
-        }
-    }
-}
+                    const user = await authService.getCurrentUser();
+                    const accountLink = document.querySelector('.account-link');
+                    if (accountLink) {
+                        if (user) {
+                            accountLink.href = 'account.html';
+                            accountLink.innerHTML = `<i class="fas fa-user-check"></i>`; // Logged in icon
+                        } else {
+                            accountLink.href = 'login.html';
+                            accountLink.innerHTML = `<i class="far fa-user"></i>`;
+                        }
+                    }
+                }
 
-injectSearchOverlay() {
-    // Do not inject in admin panel
-    if (window.location.pathname.includes('/admin/')) return;
+    injectSearchOverlay() {
+                    // Do not inject in admin panel
+                    if (window.location.pathname.includes('/admin/')) return;
 
-    if (!document.querySelector('.search-overlay')) {
-        const overlay = document.createElement('div');
-        overlay.className = 'search-overlay';
-        overlay.innerHTML = `
-                    < div class= "search-container" >
+                    if (!document.querySelector('.search-overlay')) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'search-overlay';
+                        overlay.innerHTML = `
+                <div class="search-container">
                     <button class="close-search"><i class="fas fa-times"></i></button>
                     <input type="text" class="search-input" placeholder="O QUE VOCÊ PROCURA?">
                 </div>
             `;
-        document.body.appendChild(overlay);
-    }
-}
+                        document.body.appendChild(overlay);
+                    }
+                }
 
-bindSearchEvents() {
-    this.injectSearchOverlay();
+    bindSearchEvents() {
+                    this.injectSearchOverlay();
 
-    const triggers = document.querySelectorAll('.search-trigger');
-    const overlay = document.querySelector('.search-overlay');
-    const closeBtn = document.querySelector('.close-search');
-    const input = document.querySelector('.search-overlay .search-input');
+                    const triggers = document.querySelectorAll('.search-trigger');
+                    const overlay = document.querySelector('.search-overlay');
+                    const closeBtn = document.querySelector('.close-search');
+                    const input = document.querySelector('.search-overlay .search-input');
 
-    if (!overlay) return;
+                    if (!overlay) return;
 
-    triggers.forEach(trigger => {
-        trigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            overlay.classList.add('active');
-            setTimeout(() => input.focus(), 100);
-        });
-    });
+                    triggers.forEach(trigger => {
+                        trigger.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            overlay.classList.add('active');
+                            setTimeout(() => input.focus(), 100);
+                        });
+                    });
 
-    const closeSearch = () => {
-        overlay.classList.remove('active');
-        input.value = '';
-    };
+                    const closeSearch = () => {
+                        overlay.classList.remove('active');
+                        input.value = '';
+                    };
 
-    closeBtn?.addEventListener('click', closeSearch);
+                    closeBtn?.addEventListener('click', closeSearch);
 
-    // Close on click outside
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeSearch();
-    });
+                    // Close on click outside
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) closeSearch();
+                    });
 
-    // Handle Enter key
-    input?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const query = input.value.trim();
-            if (query) {
-                window.location.href = `category.html ? search = ${ encodeURIComponent(query) }`;
+                    // Handle Enter key
+                    input?.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            const query = input.value.trim();
+                            if (query) {
+                                window.location.href = `category.html?search=${encodeURIComponent(query)}`;
+                            }
+                        }
+                    });
+
+                    // Close on Escape
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                            closeSearch();
+                        }
+                    });
+                }
+
+    // Banner System (Fixed)
+    async loadBanners() {
+                    // Find containers
+                    const sliderContainer = document.querySelector('.slider-container');
+                    const promoContainer = document.querySelector('.promo-banners-grid');
+
+                    // Only proceed if at least one container exists
+                    if (!sliderContainer && !promoContainer) return;
+
+                    try {
+                        const banners = await db.getBanners();
+
+                        // 1. Filter Banners
+                        const heroBanners = banners.filter(b => b.type === 'hero');
+                        const promoBanners = banners.filter(b => b.type === 'promo' || !b.type);
+
+                        // 2. Render Hero Slider
+                        if (sliderContainer && heroBanners.length > 0) {
+                            sliderContainer.innerHTML = heroBanners.map((b, index) => `
+                    <div class="slide ${index === 0 ? 'active' : ''}" 
+                         style="background-image: url('${b.image}')"
+                         onclick="window.location.href='${b.link || '#'}'">
+                        <div class="slide-content container">
+                             <h2 class="text-display" style="display:none;">${b.alt || ''}</h2>
+                        </div>
+                    </div>
+                `).join('');
+
+                            this.initHeroSlider();
+                        }
+
+                        // 3. Render Promo Grid
+                        if (promoContainer) {
+                            if (promoBanners.length > 0) {
+                                promoContainer.innerHTML = promoBanners.map(banner => `
+                        <div class="promo-banner" onclick="window.location.href='${banner.link || '#'}'" style="cursor: pointer;">
+                            <img src="${banner.image}" alt="${banner.alt}">
+                            <div class="promo-content">
+                                <h3>${banner.alt || 'Oferta'}</h3>
+                                <a href="${banner.link || '#'}" class="btn btn-primary">Confira</a>
+                            </div>
+                        </div>
+                    `).join('');
+                                promoContainer.parentElement.style.display = 'block';
+                            } else {
+                                promoContainer.innerHTML = '';
+                                promoContainer.parentElement.style.display = 'none'; // Clear ghost banners
+                            }
+                        }
+
+                    } catch (e) {
+                        // Passive fail - don't crash app
+                        console.log('Banners not loaded or empty.');
+                    }
+                }
+
+    formatCurrency(value) {
+                    return new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(value);
+                }
             }
-        }
-    });
-
-    // Close on Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && overlay.classList.contains('active')) {
-            closeSearch();
-        }
-    });
-}
-}
 
 const app = new App();
-window.app = app;
+            window.app = app;
 
-document.addEventListener('DOMContentLoaded', () => {
-    app.bindSearchEvents();
-});
+            document.addEventListener('DOMContentLoaded', () => {
+                app.bindSearchEvents();
+            });
