@@ -88,87 +88,70 @@ class App {
                 name: product.name,
                 price: product.price,
                 price_promo: product.price_promo,
-                image: imageUrl, // Store only the main image
-                slug: product.slug,
-                size: size,
-                color: color,
-                quantity: quantity,
-                weight: product.weight // Needed for freight
-            });
-        }
 
-        this.saveCart();
-        this.showToast('Produto adicionado ao carrinho!');
-    }
-
-    removeFromCart(index) {
-        this.cart.splice(index, 1);
-        this.saveCart();
-    }
-
-    updateQuantity(index, delta) {
-        const item = this.cart[index];
-        if (item.quantity + delta > 0) {
-            item.quantity += delta;
-            this.saveCart();
-        }
-    }
+                updateQuantity(index, delta) {
+                    const item = this.cart[index];
+                    if (item.quantity + delta > 0) {
+                        item.quantity += delta;
+                        this.saveCart();
+                    }
+                }
 
     saveCart() {
-        localStorage.setItem('seven_cart', JSON.stringify(this.cart));
-        this.updateCartCount();
-        // If cart sidebar is active, re-render it
-        if (document.querySelector('.cart-sidebar.active')) {
-            this.renderCartDrawer();
-        }
-    }
+                    localStorage.setItem('seven_cart', JSON.stringify(this.cart));
+                    this.updateCartCount();
+                    // If cart sidebar is active, re-render it
+                    if (document.querySelector('.cart-sidebar.active')) {
+                        this.renderCartDrawer();
+                    }
+                }
 
     updateCartCount() {
-        const count = this.cart.reduce((acc, item) => acc + item.quantity, 0);
-        const badges = document.querySelectorAll('.cart-count');
-        badges.forEach(b => {
-            b.textContent = count;
-            b.style.display = count > 0 ? 'flex' : 'none';
-        });
-    }
+                    const count = this.cart.reduce((acc, item) => acc + item.quantity, 0);
+                    const badges = document.querySelectorAll('.cart-count');
+                    badges.forEach(b => {
+                        b.textContent = count;
+                        b.style.display = count > 0 ? 'flex' : 'none';
+                    });
+                }
 
     getCartTotal() {
-        return this.cart.reduce((acc, item) => {
-            const price = item.price_promo || item.price;
-            return acc + (price * item.quantity);
-        }, 0);
-    }
+                    return this.cart.reduce((acc, item) => {
+                        const price = item.price_promo || item.price;
+                        return acc + (price * item.quantity);
+                    }, 0);
+                }
 
     toggleCart() {
-        const sidebar = document.getElementById('cart-sidebar');
-        const overlay = document.querySelector('.cart-overlay');
+                    const sidebar = document.getElementById('cart-sidebar');
+                    const overlay = document.querySelector('.cart-overlay');
 
-        if (sidebar && overlay) {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+                    if (sidebar && overlay) {
+                        sidebar.classList.toggle('active');
+                        overlay.classList.toggle('active');
 
-            if (sidebar.classList.contains('active')) {
-                this.renderCartDrawer();
-            }
-        } else {
-            // Fallback for pages without sidebar (like index.html currently)
-            window.location.href = 'checkout.html';
-        }
-    }
+                        if (sidebar.classList.contains('active')) {
+                            this.renderCartDrawer();
+                        }
+                    } else {
+                        // Fallback for pages without sidebar (like index.html currently)
+                        window.location.href = 'checkout.html';
+                    }
+                }
 
     renderCartDrawer() {
-        const container = document.getElementById('cart-items');
-        const totalEl = document.getElementById('cart-total-price');
+                    const container = document.getElementById('cart-items');
+                    const totalEl = document.getElementById('cart-total-price');
 
-        if (!container || !totalEl) return;
+                    if (!container || !totalEl) return;
 
-        if (this.cart.length === 0) {
-            container.innerHTML = '<p style="text-align:center; padding:20px; color: #666;">Seu carrinho está vazio.</p>';
-            totalEl.textContent = this.formatCurrency(0);
-            return;
-        }
+                    if (this.cart.length === 0) {
+                        container.innerHTML = '<p style="text-align:center; padding:20px; color: #666;">Seu carrinho está vazio.</p>';
+                        totalEl.textContent = this.formatCurrency(0);
+                        return;
+                    }
 
-        container.innerHTML = this.cart.map((item, index) => `
+                    container.innerHTML = this.cart.map((item, index) => `
             <div class="cart-item">
                 <img src="${item.image}" alt="${item.name}">
                 <div class="cart-item-details">
@@ -219,7 +202,7 @@ injectSearchOverlay() {
         const overlay = document.createElement('div');
         overlay.className = 'search-overlay';
         overlay.innerHTML = `
-        < div class= "search-container" >
+                    < div class= "search-container" >
                     <button class="close-search"><i class="fas fa-times"></i></button>
                     <input type="text" class="search-input" placeholder="O QUE VOCÊ PROCURA?">
                 </div>
